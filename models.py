@@ -1,23 +1,24 @@
 from datetime import datetime
 
-from app import db
+from config import db
 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     role = db.Column(db.String(128))
+    password = db.Column(db.String(128))
 
     def __repr__(self):
         return '<User %r>' % self.name
 
 
-class Article(db.Model):
+class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     intro = db.Column(db.String(300), nullable=False)
     text = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(20), nullable=False, default='N/A')
+    author = db.Column(db.String(20), nullable=False, default='Vi')
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):

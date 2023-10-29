@@ -8,8 +8,10 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="index">Заметки</a>
+          {% if endpoint != 'notes' %}
+            <a class="nav-link active" aria-current="page" href="notes">Заметки</a>
           </li>
+          {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="#">Бот</a>
           </li>
@@ -20,11 +22,11 @@
             <a class="nav-link" href="about">О сайте</a>
           </li>
           {% endif %}
-          </li>
           <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">Ты можешь</a>
           </li>
         </ul>
+        <a href="create_note" class="btn btn-warning" style="margin-right: 10px;">New note</a>
         <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Search</button>
