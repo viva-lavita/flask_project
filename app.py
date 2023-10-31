@@ -26,7 +26,8 @@ def contact(name):
 @app.route('/notes')
 def notes():
     endpoint = request.endpoint
-    return render_template('notes.html', endpoint=endpoint)
+    notes = Note.query.order_by(Note.data).all()
+    return render_template('notes.html', notes=notes, endpoint=endpoint)
 
 
 @app.route('/create_note', methods=['GET', 'POST'])
@@ -39,7 +40,7 @@ def create_note():
         try:
             db.session.add(note)
             db.session.commit()
-            return redirect('/', code=302)
+            return redirect('/notes', code=302)
         except Exception as e:
             return 'При добавлении заметки произошла ошибка'
     else:
