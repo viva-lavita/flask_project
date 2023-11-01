@@ -40,8 +40,8 @@ def create_note():
         try:
             db.session.add(note)
             db.session.commit()
-            return redirect('/notes', code=302)
-        except Exception as e:
+            return redirect('/', code=302)
+        except Exception:
             return 'При добавлении заметки произошла ошибка'
     else:
         endpoint = request.endpoint
