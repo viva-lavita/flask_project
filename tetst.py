@@ -1,4 +1,5 @@
-from typing import List, Tuple
+from collections import Counter
+from typing import List
 
 
 def get_index(office: List[str]) -> dict[int: List[int]]:
@@ -38,21 +39,18 @@ def fake_bin(s):
     return s.translate(str.maketrans('0123456789', '0000011111'))
 
 
-print(fake_bin('8123456789'))
+# print(fake_bin('8123456789'))
 
 
-def likes(names):
-    len_names = len(names)
-    if len_names < 2:
-        return '{} likes this'.format(['no one', *names][len_names])
-    if len_names == 2:
-        return '{} and {} like this'.format(*names)
-    if len_names == 3:
-        return '{}, {} and {} like this'.format(*names)
-    return '{}, {} and {} others like this'.format(*names[0: 2], len_names - 2)
-
-
-print(likes([]))
+# def likes(names):
+#     len_names = len(names)
+#     if len_names < 2:
+#         return '{} likes this'.format(['no one', *names][len_names])
+#     if len_names == 2:
+#         return '{} and {} like this'.format(*names)
+#     if len_names == 3:
+#         return '{}, {} and {} like this'.format(*names)
+#     return '{}, {} and {} others like this'.format(*names[0: 2], len_names - 2)
 
 
 def likes(names):
@@ -62,3 +60,38 @@ def likes(names):
         case [a, b]: return f'{a} and {b} like this'
         case [a, b, c]: return f'{a}, {b} and {c} like this'
         case [a, b, *rest]: return f'{a}, {b} and {len(rest)} others like this'
+
+
+def unique_in_order(sequence):
+    return [el for idx, el in enumerate(sequence)
+            if idx == 0 or el != sequence[idx - 1]]
+
+
+print(unique_in_order("AAAABBBCCDAABBB"))
+
+
+def find_it(seq):
+    return [k for k, v in Counter(seq).items() if v % 2][0]
+
+# print(find_it([1, 1, 2, -2, 5, 2, 4, 4, -1, -2, 5]))
+
+
+# def high(x):
+#     d = {word: sum([(ord(char) - 96) for char in word]) for word in x.split()}
+#     return max(d, key=d.get)
+
+def high(x):
+    return max(x.split(), key=lambda k: sum(ord(c) - 96 for c in k))
+
+
+# print(high('what time are we climbing up the volcano'))
+
+def to_jaden_case(string):
+    return ' '.join(map(str.capitalize, string.split()))
+
+from collections import Counter
+
+def duplicate_count(text):
+    return sum(text.count(c) > 1 for c in set(text.lower()))
+
+# print(duplicate_count("abcdeaa"))

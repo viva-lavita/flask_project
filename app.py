@@ -1,10 +1,9 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, request, redirect
 
 from config import app, db
 from models import Note
 
 
-@app.route('/')
 @app.route('/index')
 def index():
     endpoint = request.endpoint
@@ -26,7 +25,7 @@ def contact(name):
 @app.route('/notes')
 def notes():
     endpoint = request.endpoint
-    notes = Note.query.order_by(Note.data).all()
+    notes = Note.query.order_by(Note.data.desc()).all()
     return render_template('notes.html', notes=notes, endpoint=endpoint)
 
 
@@ -46,6 +45,15 @@ def create_note():
     else:
         endpoint = request.endpoint
         return render_template('create_note.html', endpoint=endpoint)
+
+
+@app.route('/notes/<int:id>')
+def note(id):
+    try:
+        note = Note.get_by_id(id)
+    except Exception:
+        return 'Заметка не найдена'
+    return render_template('note.html', note=note)
 
 
 if __name__ == '__main__':

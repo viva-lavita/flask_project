@@ -23,3 +23,8 @@ class Note(db.Model):
 
     def __repr__(self):
         return '<Article %r>' % self.id  # обьект и его id 
+
+    @classmethod
+    def get_by_id(cls, id_):
+        """Удобный, кастомный метод запроса."""
+        return cls.query.session.get(cls, id_)
