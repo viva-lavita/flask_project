@@ -94,4 +94,33 @@ from collections import Counter
 def duplicate_count(text):
     return sum(text.count(c) > 1 for c in set(text.lower()))
 
+
 # print(duplicate_count("abcdeaa"))
+
+# from functools import reduce
+# def row_sum_odd_numbers(n):
+#     start = 1
+#     step = 0
+#     for i in range(1, n):
+#         step += 2
+#         start = start + step
+#     return reduce(lambda x, y: x + y, range(start, start+(n*2), 2))
+
+def row_sum_odd_numbers(n):
+    """ А всего то n ** 3"""
+    start = 1
+    step = 0
+    for i in range(1, n):
+        step += 2
+        start += step
+    return sum(range(start, start + (n * 2), 2))
+
+
+# print(row_sum_odd_numbers(5))
+
+def alphabet_position(text):
+    # return ''.join(ord(char) - 96 for char in text.split())
+    return ' '.join(str(ord(char) - 96) for char in text.lower() if char.isalpha())
+    # return [char for char in text.lower() if char.isalpha()]
+
+print(alphabet_position("The sunset sets at twelve o' clock."))

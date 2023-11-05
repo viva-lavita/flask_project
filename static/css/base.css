@@ -7,11 +7,17 @@ body {
 .favorite-button {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 110px;
 }
 
 .edit-button {
   position: absolute;
   top: 10px;
   right: 60px;
+}
+
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }

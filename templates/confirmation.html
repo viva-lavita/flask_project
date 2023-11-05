@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Удаление {{ note.title }}
+{% endblock %}
+
+{% block content %}
+
+  <div class="container mt-5" style="width: 500px;">
+    <h1>Удаление заметки {{ note.title }}</h1>
+    <p>Вы действительно хотите удалить заметку "{{ note.title }}"?</p>
+      <a href="/notes/{{ note.id }}/delete" class="btn btn-danger">Удалить</a>
+      <a href="/notes" class="btn btn-success">Отмена</a>
+  </div>
+
+{% endblock %}

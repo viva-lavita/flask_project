@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect
+from flask import render_template, request, redirect
 
 from config import app, db
-from models import Note
+from models import Note, User
 
 
+@app.route('/')
 @app.route('/index')
 def index():
     endpoint = request.endpoint
@@ -39,7 +40,7 @@ def create_note():
         try:
             db.session.add(note)
             db.session.commit()
-            return redirect('/', code=302)
+            return redirect('/notes', code=302)
         except Exception:
             return 'При добавлении заметки произошла ошибка'
     else:
@@ -49,11 +50,82 @@ def create_note():
 
 @app.route('/notes/<int:id>')
 def note(id):
-    try:
-        note = Note.get_by_id(id)
-    except Exception:
+    note = Note.get_by_id(id)
+    if not note:
         return 'Заметка не найдена'
     return render_template('note.html', note=note)
+
+
+@app.route('/notes/<int:id>/delete')
+def delete_note(id):
+    note = Note.query.get_or_404(id)
+    try:
+        db.session.delete(note)
+        db.session.commit()
+        return redirect('/notes', code=302)
+    except Exception:
+        return 'При удалении заметки произошла ошибка'
+
+
+@app.route('/notes/<int:id>/confirmation')
+def confirmation(id):
+    note = Note.get_by_id(id)
+    if not note:
+        return 'Заметка не найдена'
+    return render_template('confirmation.html', note=note)
+
+
+@app.route('/notes/<int:id>/favorite', methods=['POST'])
+def favorite(id):
+    note = Note.get_by_id(id)
+    user = User.get_by_id(request.args.get('user_id'))
+    if not note or not user:
+        return 'Заметка или пользователь не найдены'
+    if request.method == 'POST':
+        user.notes.append(note)
+        try:
+            db.session.commit()
+            return redirect('/notes/' + str(id), code=302)
+        except Exception:
+            return 'При добавлении заметки произошла ошибка'
+
+
+@app.route('/notes/<int:id>/unfavorite')
+def unfavorite(id):
+    note = Note.get_by_id(id)
+    user = User.get_by_id(request.args.get('user_id'))
+    if not note or not user:
+        return 'Заметка Или пользователь не найдены'
+    if request.method == 'DELETE':  # прописать разную кнопку на удаление и добавление
+        if note not in user.notes:
+            return 'Заметка в избранном пользователя не найдена'
+        user.notes.remove(note)
+        try:
+            db.session.commit()
+            return redirect('/notes/' + str(id), code=302)
+        except Exception:
+            return 'При удалении заметки произошла ошибка'
+
+
+@app.route('/notes/<int:id>/edit', methods=['POST', 'GET'])
+def edit_note(id):
+    if request.method == 'POST':
+        title = request.form['title']
+        intro = request.form['intro']
+        text = request.form['text']
+        try:
+            note = Note.get_by_id(id)
+            note.title = title
+            note.intro = intro
+            note.text = text
+            db.session.commit()
+            return redirect('/notes/' + str(id), code=302)
+        except Exception:
+            return 'При обновлении заметки произошла ошибка'
+    note = Note.get_by_id(id)
+    if not note:
+        return 'Заметка не найдена'
+    return render_template('edit_note.html', note=note)
 
 
 if __name__ == '__main__':

@@ -12,6 +12,11 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.name
 
+    @classmethod
+    def get_by_id(cls, id_):
+        """Удобный, кастомный метод запроса."""
+        return cls.query.session.get(cls, id_)
+
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,7 +27,7 @@ class Note(db.Model):
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Article %r>' % self.id  # обьект и его id 
+        return '<Article %r>' % self.id  # обьект и его id
 
     @classmethod
     def get_by_id(cls, id_):
