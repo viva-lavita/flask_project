@@ -11,19 +11,25 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 #######################################
 # Flask-SQLAlchemy
 #######################################
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'test.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test.db')
-SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
+app.app_context().push()
+# migrate = Migrate(app, db)
+app.config['SQLALCHEMY_MIGRATE_REPO'] = os.path.join(basedir, 'db_repository')
 
 
 #######################################
 # Flask-Security
 #######################################
-CSRF_ENABLED = True
-SECRET_KEY = 'you-will-never-guess'
+app.config['CSRF_ENABLED'] = True
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or \
+        'you-will-never-guess'
+# allows new registrations to application
+app.config['SECURITY_REGISTERABLE'] = True
+# to send automatic registration email to user
+app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 
 
 ###########################################################################

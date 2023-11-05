@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, url_for
 
 from config import app, db
 from models import Note, User
@@ -36,7 +36,11 @@ def create_note():
         title = request.form['title']
         intro = request.form['intro']
         text = request.form['text']
-        note = Note(title=title, intro=intro, text=text)
+        try:
+            user_id = request.args.get('user_id')
+        except Exception:
+            user_id = 1 # заменить, после добавления функционала авторизации
+        note = Note(title=title, intro=intro, text=text, user_id=user_id)
         try:
             db.session.add(note)
             db.session.commit()
@@ -75,10 +79,13 @@ def confirmation(id):
     return render_template('confirmation.html', note=note)
 
 
-@app.route('/notes/<int:id>/favorite', methods=['POST'])
+@app.route('/notes/<int:id>/favorite')
 def favorite(id):
-    note = Note.get_by_id(id)
-    user = User.get_by_id(request.args.get('user_id'))
+    note = (db.session.query(Note)
+            .join(User)
+            .filter(Note.id == id, User.id == request.args.get('user_id'))
+            .first())
+    user = note.user_id
     if not note or not user:
         return 'Заметка или пользователь не найдены'
     if request.method == 'POST':
@@ -129,4 +136,6 @@ def edit_note(id):
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
