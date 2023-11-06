@@ -1,5 +1,5 @@
-from flask import render_template, request, redirect, url_for
-from flask_login import login_required
+from flask import flash, render_template, request, redirect, url_for
+from flask_login import login_required, login_user, logout_user, current_user
 
 from config import app, db
 from models import Note, User
@@ -11,35 +11,50 @@ def admin():
     return render_template('admin.html')
 
 
-@app.route('/login', methods=['POST',  'GET'])
+@app.route('/login', methods=['POST', 'GET'])
 def login():
     endpoint = request.endpoint
-    message = ''
     if request.method == 'POST':
-        print(request.form)
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    if username == 'root' and password == 'pass':
-        message = "Correct username and password"
-    else:
-        message = "Wrong username or password"
-
-    return render_template('login.html', message=message, endpoint=endpoint)
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = db.session.query(User).filter(User.username == username).first()
+        if user and user.check_password(password):
+            login_user(user, remember=True)
+            flash('Вы вошли в систему', 'success')
+            return redirect(url_for('notes'))
+        else:
+            flash('Неправильное имя пользователя или пароль', 'danger')
+            return render_template('login.html', endpoint=endpoint)
+    return render_template('login.html', endpoint=endpoint)
 
 
 @app.route('/logout')
-def logout(): # дописать!
-    endpoint = request.endpoint
-    return render_template('logout.html', endpoint=endpoint)
+@login_required
+def logout():
+    logout_user()
+    return render_template('logout.html')
 
-@app.route('/register', methods=['POST',  'GET'])
+
+@app.route('/register', methods=['POST', 'GET'])
 def register():
     endpoint = request.endpoint
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         email = request.form.get('email')
+        if User.query.filter(User.username == username).first():
+            flash('Пользователь с таким именем уже существует', 'danger')
+            return redirect(url_for('login'))
+        user = User(username=username, email=email)
+        user.set_password(password)
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Пользователь успешно добавлен', 'success')
+            return redirect(url_for('login'))
+        except Exception:
+            flash('При добавлении пользователя произошла ошибка', 'danger')
+            return redirect(url_for('login'))
     return render_template('login.html', endpoint=endpoint)
 
 
@@ -75,10 +90,7 @@ def create_note():
         title = request.form['title']
         intro = request.form['intro']
         text = request.form['text']
-        try:
-            user = request.args.get('user_id')
-        except Exception:
-            user = 1 # заменить, после добавления функционала авторизации
+        user = request.args.get('user_id')
         note = Note(title=title, intro=intro, text=text, user_id=user)
         try:
             db.session.add(note)
@@ -120,44 +132,41 @@ def confirmation(id):
 
 @app.route('/notes/<int:id>/favorite')
 def favorite(id):
-    try:
-        note = (db.session.query(Note)
-                .join(User)
-                .filter(Note.id == id, User.id == request.args.get('user_id'))
-                .first())
-        user = note.user_id
-    except Exception:
-        user = 1 # заменить, после добавления функционала авторизации
+    note = (db.session.query(Note)
+            .filter(Note.id == id)
+            .first())
+    user = current_user
     if not note or not user:
         return f'Заметка или пользователь не найдены {user}'
-    if request.method == 'POST':
-        user.notes.append(note)
-        try:
-            db.session.commit()
-            return redirect('/notes/' + str(id), code=302)
-        except Exception:
-            return 'При добавлении заметки произошла ошибка'
+    user.favorite_notes.append(note)
+    try:
+        db.session.commit()
+        return redirect('/notes/' + str(id), code=302)
+    except Exception:
+        return 'При добавлении заметки произошла ошибка'
 
 
 @app.route('/notes/<int:id>/unfavorite')
 def unfavorite(id):
-    note = Note.get_by_id(id)
-    user = User.get_by_id(request.args.get('user_id'))
+    note = (db.session.query(Note)
+            .filter(Note.id == id)
+            .first())
+    user = current_user
     if not note or not user:
-        return 'Заметка Или пользователь не найдены'
-    if request.method == 'DELETE':  # прописать разную кнопку на удаление и добавление
-        if note not in user.notes:
-            return 'Заметка в избранном пользователя не найдена'
-        user.notes.remove(note)
-        try:
-            db.session.commit()
-            return redirect('/notes/' + str(id), code=302)
-        except Exception:
-            return 'При удалении заметки произошла ошибка'
+        return 'Заметка или пользователь не найдены'
+    if note not in user.notes:
+        return 'Заметка в избранном пользователя не найдена'
+    user.favorite_notes.remove(note)
+    try:
+        db.session.commit()
+        return redirect('/notes/' + str(id), code=302)
+    except Exception:
+        return 'При удалении заметки произошла ошибка'
 
 
 @app.route('/notes/<int:id>/edit', methods=['POST', 'GET'])
 def edit_note(id):
+    endpoint = request.endpoint
     if request.method == 'POST':
         title = request.form['title']
         intro = request.form['intro']
@@ -174,7 +183,7 @@ def edit_note(id):
     note = Note.get_by_id(id)
     if not note:
         return 'Заметка не найдена'
-    return render_template('edit_note.html', note=note)
+    return render_template('create_note.html', note=note, endpoint=endpoint)
 
 
 if __name__ == '__main__':

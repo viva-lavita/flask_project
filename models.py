@@ -22,6 +22,17 @@ from config import db, login_manager
 #     description = db.Column(db.String(255))
 
 
+favorites = db.Table(
+    'favorites',
+    db.Column(
+        'note_id', db.Integer, db.ForeignKey('note.id'), primary_key=True
+    ),
+    db.Column(
+        'usser_id', db.Integer, db.ForeignKey('user.id'), primary_key=True
+    )
+)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.query(User).get(user_id)
@@ -30,18 +41,22 @@ def load_user(user_id):
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    username = db.Column(
+        db.String(64), index=True, unique=True, nullable=False
+    )
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     notes = db.relationship('Note', backref='author', lazy='dynamic')
     # roles = db.relationship('Role', secondary=roles_users,
     #                         backref=db.backref('users', lazy='dynamic'))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    updated_on = db.Column(
+        db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
-    def __init__(self, email, password):
+    def __init__(self, email, username):
+        self.username = username
         self.email = email
-        self.password = password
         self.active = True
         self.confirmed_at = datetime.utcnow()
 
@@ -54,6 +69,12 @@ class User(db.Model, UserMixin):
     def check_password(self,  password):
         return check_password_hash(self.password_hash, password)
 
+    def is_favorite(self, note):
+        """ Проверка заметки на избранное """
+        if not self.favorite_notes:
+            return False
+        return note in self.favorite_notes
+
     @classmethod
     def get_by_id(cls, id_) -> 'User':
         """
@@ -63,24 +84,22 @@ class User(db.Model, UserMixin):
         return cls.query.session.get(cls, id_)
 
 
-# admin = create_admin(app, db.session, User)
-# admin.create_admin(username='admin', password='password')
-
-# user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-# security = Security(app, user_datastore)
-# admin = Admin(app, name='Example', template_mode='bootstrap3')
-
-
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    intro = db.Column(db.String(300), nullable=False)
+    title = db.Column(db.String(50), nullable=False)
+    intro = db.Column(db.String(200), nullable=False)
     text = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer,
                         db.ForeignKey('user.id'),
                         nullable=False,
                         default=1)
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    favorites = db.relationship('User',
+                                secondary='favorites',
+                                backref=db.backref('favorite_notes',
+                                                   lazy=True),
+                                lazy='subquery')
+
 
     def __repr__(self):
         return '<Article %r>' % self.id  # обьект и его id

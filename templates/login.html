@@ -2,7 +2,6 @@
 
 {% block styles %}
   <link href="{{ url_for('static', filename='css/login.css')}}" rel="stylesheet">
-  <script src="{{ url_for('static', filename='js/login.js')}}"></script>
 {% endblock %}
 
 {% block title %}
@@ -16,11 +15,13 @@
             <div class="circle circle-one"></div>
             <div class="form-container">
                 <img src="{{ url_for('static', filename='img/login/illustration.png')}}" alt="illustration" class="illustration" />
+                <form method="post">
                 {% if endpoint == 'login' %}
                     <h1-login class="opacity">Вход</h1-login>
                     <form>
-                        <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" />
-                        <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" />
+                        <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" autocomplete="username" class="form-control"/>
+                        <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" autocomplete="current-password" class="form-control"/>
+                        <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
                         <button type="submit" class="opacity">ОТПРАВИТЬ</button>
                     </form>
                     <div class="register-forget opacity">
@@ -30,13 +31,20 @@
                 {% else %}
                     <h1-login class="opacity">Регистрация</h1-login>
                         <form>
-                            <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" />
-                            <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" />
-                            <input type="email" name="email" id="email" placeholder="ПОЧТОВЫЙ АДРЕС" />
+                            <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" autocomplete="username"/>
+                            <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" autocomplete="new-password"/>
+                            <input type="email" name="email" id="email" placeholder="ПОЧТОВЫЙ АДРЕС" autocomplete="email"/>
+                            <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
                             <button type="submit" class="opacity">ОТПРАВИТЬ</button>
                         </form>
                 {% endif %}
+                </form>
             </div>
+            {% for category, message in  get_flashed_messages(with_categories=true) %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
             <div class="circle circle-two"></div>
         </div>
         <div class="theme-btn-container"></div>
