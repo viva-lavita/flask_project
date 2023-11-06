@@ -1,17 +1,36 @@
 {% extends 'base.html' %}
 
 {% block title %}
+{% if endpoint == 'create_note' %}
 Создай новую заметку
+{% else %}
+{{ note.title }}
+{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5" style="width: 500px;">
+  <div class="container mt-5" style="width: 500px;">
+    {% if endpoint == 'create_note' %}
     <h1>Создай новую заметку</h1>
+    {% else %}
+    <h1>{{ note.title }}</h1>
+    {% endif %}
     <form method="post">
-        <input type="title" name="title" id="title" placeholder="Заголовок" class="form-control"><br>
-        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 200px;"></textarea><br>
-        <textarea name="text" id="text" placeholder="Текст заметки" class="form-control" style="height: 300px;"></textarea><br>
-        <input type="submit" value="Сохранить" class="btn btn-success">
+      <div class="form-control-wrapper">
+        <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}"/>
+        <input type="title" name="title" id="title" placeholder="Заголовок" class="form-control" {% if endpoint == "create_note" %} {% else %} value="{{ note.title }}" {% endif %}maxlength="50">
+        <span class="character-counter" id="titleCounter"></span>
+      </div><br>
+      <div class="form-control-wrapper">
+        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 200px;" maxlength="200">{% if endpoint == 'create_note' %} {% else %}{{ note.intro }}{% endif %}</textarea>
+        <span class="character-counter" id="introCounter"></span>
+      </div><br>
+      <div class="form-control-wrapper">
+        <textarea name="text" id="text" placeholder="Текст заметки" class="form-control" style="height: 300px;" maxlength="10000">{% if endpoint == 'create_note' %} {% else %}{{ note.text }}{% endif %}</textarea>
+        <span class="character-counter" id="textCounter"></span>
+      </div><br>
+      <input type="submit" value="Сохранить" class="btn btn-success">
     </form>
-</div>
+  </div>
+  <script src="{{ url_for('static', filename='js/create-counter.js')}}"></script>
 {% endblock %}

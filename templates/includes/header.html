@@ -26,7 +26,11 @@
             <a class="nav-link disabled" aria-disabled="true">Шустрее</a>
           </li>
         </ul>
-        <a href="/create_note" class="btn btn-warning" style="margin-right: 10px;">Новая заметка</a>
+        {% if current_user.is_authenticated %}
+          <a href="/create_note" class="btn btn-warning" style="margin-right: 10px;">Новая заметка</a>
+        {% else %}
+          <a href="/login" class="btn btn-warning" style="margin-right: 10px;">Вход</a>
+        {% endif %}
         <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Поиск</button>

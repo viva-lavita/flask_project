@@ -1,8 +1,11 @@
 import os
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import CSRFProtect
+
 
 app = Flask(__name__)
 
@@ -13,10 +16,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 #######################################
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'test.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-app.app_context().push()
-# migrate = Migrate(app, db)
+# app.app_context().push()
+migrate = Migrate(app, db)
 app.config['SQLALCHEMY_MIGRATE_REPO'] = os.path.join(basedir, 'db_repository')
 
 
@@ -28,8 +32,27 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or \
         'you-will-never-guess'
 # allows new registrations to application
 app.config['SECURITY_REGISTERABLE'] = True
+csrf = CSRFProtect(app)
+
+
+#######################################
+# Flask-Login
+#######################################
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+
+#######################################
+# Flask-Mail
+#######################################
 # to send automatic registration email to user
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') or 'YOU_MAIL@gmail.com'
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or 'password'
+app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
 
 ###########################################################################
