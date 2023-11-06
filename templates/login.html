@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+  <link href="{{ url_for('static', filename='css/login.css')}}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/login.js')}}"></script>
+{% endblock %}
+
+{% block title %}
+  Авторизация
+{% endblock %}
+
+{% block content %}
+<body>
+    <section class="container-login">
+        <div class="login-container">
+            <div class="circle circle-one"></div>
+            <div class="form-container">
+                <img src="{{ url_for('static', filename='img/login/illustration.png')}}" alt="illustration" class="illustration" />
+                {% if endpoint == 'login' %}
+                    <h1-login class="opacity">Вход</h1-login>
+                    <form>
+                        <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" />
+                        <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" />
+                        <button type="submit" class="opacity">ОТПРАВИТЬ</button>
+                    </form>
+                    <div class="register-forget opacity">
+                        <a href="/register">Регистрация</a>
+                        <a href="">Забыли пароль?</a>
+                    </div>
+                {% else %}
+                    <h1-login class="opacity">Регистрация</h1-login>
+                        <form>
+                            <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" />
+                            <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" />
+                            <input type="email" name="email" id="email" placeholder="ПОЧТОВЫЙ АДРЕС" />
+                            <button type="submit" class="opacity">ОТПРАВИТЬ</button>
+                        </form>
+                {% endif %}
+            </div>
+            <div class="circle circle-two"></div>
+        </div>
+        <div class="theme-btn-container"></div>
+    </section>
+</body>
+{% endblock %}

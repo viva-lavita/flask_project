@@ -1,7 +1,46 @@
 from flask import render_template, request, redirect, url_for
+from flask_login import login_required
 
 from config import app, db
 from models import Note, User
+
+
+@app.route('/admin/')
+@login_required
+def admin():
+    return render_template('admin.html')
+
+
+@app.route('/login', methods=['POST',  'GET'])
+def login():
+    endpoint = request.endpoint
+    message = ''
+    if request.method == 'POST':
+        print(request.form)
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if username == 'root' and password == 'pass':
+        message = "Correct username and password"
+    else:
+        message = "Wrong username or password"
+
+    return render_template('login.html', message=message, endpoint=endpoint)
+
+
+@app.route('/logout')
+def logout(): # дописать!
+    endpoint = request.endpoint
+    return render_template('logout.html', endpoint=endpoint)
+
+@app.route('/register', methods=['POST',  'GET'])
+def register():
+    endpoint = request.endpoint
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        email = request.form.get('email')
+    return render_template('login.html', endpoint=endpoint)
 
 
 @app.route('/')
@@ -37,10 +76,10 @@ def create_note():
         intro = request.form['intro']
         text = request.form['text']
         try:
-            user_id = request.args.get('user_id')
+            user = request.args.get('user_id')
         except Exception:
-            user_id = 1 # заменить, после добавления функционала авторизации
-        note = Note(title=title, intro=intro, text=text, user_id=user_id)
+            user = 1 # заменить, после добавления функционала авторизации
+        note = Note(title=title, intro=intro, text=text, user_id=user)
         try:
             db.session.add(note)
             db.session.commit()
@@ -81,13 +120,16 @@ def confirmation(id):
 
 @app.route('/notes/<int:id>/favorite')
 def favorite(id):
-    note = (db.session.query(Note)
-            .join(User)
-            .filter(Note.id == id, User.id == request.args.get('user_id'))
-            .first())
-    user = note.user_id
+    try:
+        note = (db.session.query(Note)
+                .join(User)
+                .filter(Note.id == id, User.id == request.args.get('user_id'))
+                .first())
+        user = note.user_id
+    except Exception:
+        user = 1 # заменить, после добавления функционала авторизации
     if not note or not user:
-        return 'Заметка или пользователь не найдены'
+        return f'Заметка или пользователь не найдены {user}'
     if request.method == 'POST':
         user.notes.append(note)
         try:

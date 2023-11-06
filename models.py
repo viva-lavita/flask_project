@@ -3,8 +3,10 @@
 # from flask_admin import Admin
 # from flask_security import Security, SQLAlchemyUserDatastore
 from datetime import datetime
+from flask_login import LoginManager, UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
-from config import db
+from config import db, login_manager
 
 
 # roles_users = db.Table(
@@ -20,16 +22,22 @@ from config import db
 #     description = db.Column(db.String(255))
 
 
-class User(db.Model): # добавить , UserMixin
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(User).get(user_id)
+
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(120), index=True, unique=True)
-    password = db.Column(db.String(128))
+    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
     notes = db.relationship('Note', backref='author', lazy='dynamic')
-    active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
     # roles = db.relationship('Role', secondary=roles_users,
     #                         backref=db.backref('users', lazy='dynamic'))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
     def __init__(self, email, password):
         self.email = email
@@ -39,6 +47,12 @@ class User(db.Model): # добавить , UserMixin
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self,  password):
+        return check_password_hash(self.password_hash, password)
 
     @classmethod
     def get_by_id(cls, id_) -> 'User':
