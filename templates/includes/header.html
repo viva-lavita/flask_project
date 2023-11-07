@@ -27,9 +27,9 @@
           </li>
         </ul>
         {% if current_user.is_authenticated %}
-          <a href="/create_note" class="btn btn-warning" style="margin-right: 10px;">Новая заметка</a>
+          <a href="/create_note" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Новая заметка</a>
         {% else %}
-          <a href="/login" class="btn btn-warning" style="margin-right: 10px;">Вход</a>
+          <a href="/login" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Вход</a>
         {% endif %}
         <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
