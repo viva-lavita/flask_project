@@ -8,9 +8,18 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-          {% if endpoint != 'notes' %}
-            <a class="nav-link active" aria-current="page" href="{{ url_for('notes') }}">Заметки</a>
+          {% if current_user.is_authenticated %}
+          <div class="dropdown">
+            <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
+                <a class="dropdown-item" href="{{ url_for('notes') }}">Все заметки</a>
+                <a class="dropdown-item" href="{{ url_for('favorites') }}">Избранные</a>
+                <a class="dropdown-item" href="#">Еще не придумано</a>
+              </div>
+          </div>
           </li>
+          {% else %}
+            <a class="nav-link active" aria-current="page" href="{{ url_for('notes') }}">Заметки</a>
           {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="#">Бот</a>

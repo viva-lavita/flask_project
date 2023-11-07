@@ -1,80 +1,8 @@
-from flask import flash, render_template, request, redirect, url_for
-from flask_login import login_required, login_user, logout_user, current_user
+from flask import render_template, request, redirect
+from flask_login import login_required, current_user
 
 from config import app, db
-from models import Note, User
-
-
-@app.route('/admin/')
-@login_required
-def admin():
-    return render_template('admin.html')
-
-
-@app.route('/login', methods=['POST', 'GET'])
-def login():
-    endpoint = request.endpoint
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = db.session.query(User).filter(User.username == username).first()
-        if user and user.check_password(password):
-            login_user(user, remember=True)
-            # flash('Вы вошли в систему', 'success')
-            return redirect(url_for('notes'))
-        else:
-            flash('Неправильное имя пользователя или пароль', 'danger')
-            return render_template('login.html', endpoint=endpoint)
-    return render_template('login.html', endpoint=endpoint)
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return render_template('logout.html')
-
-
-@app.route('/register', methods=['POST', 'GET'])
-def register():
-    endpoint = request.endpoint
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        email = request.form.get('email')
-        if User.query.filter(User.username == username).first():
-            flash('Пользователь с таким именем уже существует', 'danger')
-            return redirect(url_for('login'))
-        user = User(username=username, email=email)
-        user.set_password(password)
-        try:
-            db.session.add(user)
-            db.session.commit()
-            # flash('Пользователь успешно добавлен', 'success')
-            return redirect(url_for('login'))
-        except Exception:
-            flash('При добавлении пользователя произошла ошибка', 'danger')
-            return redirect(url_for('login'))
-    return render_template('login.html', endpoint=endpoint)
-
-
-@app.route('/')
-@app.route('/index')
-def index():
-    endpoint = request.endpoint
-    return render_template('index.html', endpoint=endpoint)
-
-
-@app.route('/about')
-def about():
-    endpoint = request.endpoint
-    return render_template('about.html', endpoint=endpoint)
-
-
-@app.route('/contact/<string:name>')  # переписать
-def contact(name):
-    endpoint = request.endpoint
-    return render_template('contact.html', name=name, endpoint=endpoint)
+from models import Note
 
 
 @app.route('/notes')
@@ -89,6 +17,7 @@ def notes():
         return render_template('notes.html', notes=notes, endpoint=endpoint)
     else:
         return render_template('notes.html', endpoint=endpoint)
+
 
 @app.route('/create_note', methods=['GET', 'POST'])
 @login_required
@@ -197,6 +126,18 @@ def edit_note(id):
     if not note:
         return 'Заметка не найдена'
     return render_template('create_note.html', note=note, endpoint=endpoint)
+
+
+@app.route('/notes/favorites')
+@login_required
+def favorites():
+    endpoint = request.endpoint
+    if current_user.is_authenticated:
+        user = current_user
+        notes = (Note.query.filter(Note.favorites.contains(user))).all()
+        return render_template('notes.html', notes=notes, endpoint=endpoint)
+    else:
+        return render_template('notes.html', endpoint=endpoint)
 
 
 if __name__ == '__main__':

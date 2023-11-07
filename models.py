@@ -86,9 +86,9 @@ class User(db.Model, UserMixin):
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), nullable=False)
-    intro = db.Column(db.String(200), nullable=False)
-    text = db.Column(db.Text, nullable=False)
+    title = db.Column(db.String(50), nullable=False, default=' ')
+    intro = db.Column(db.String(200), nullable=False, default=' ')
+    text = db.Column(db.Text, nullable=False, default=' ')
     user_id = db.Column(db.Integer,
                         db.ForeignKey('user.id'),
                         nullable=False,

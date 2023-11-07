@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask_mail import Mail, Message
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -42,20 +43,30 @@ csrf = CSRFProtect(app)
 #######################################
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+login_manager.login_message = "Авторизуйтесь для доступа к закрытым страницам"
+login_manager.login_message_category = "success"
 
 
 #######################################
 # Flask-Mail
 #######################################
 # to send automatic registration email to user
-app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
-app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+# app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
+app.config['MAIL_SERVER'] = 'smtp.yandex.ru'
+app.config['MAIL_PORT'] = 465
+# app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') or 'YOU_MAIL@gmail.com'
-print(app.config['MAIL_USERNAME'])
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or 'password'
 app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
+# app.config['SECURITY_EMAIL_SENDER'] = app.config['MAIL_USERNAME']
+# app.config['SECURITY_EMAIL_SUBJECT_REGISTER'] = 'Регистрация'
+# app.config['SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'] = 'Смена пароля'
+# app.config['SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE'] = 'Смена пароля'
+# app.config['SECURITY_EMAIL_SUBJECT_CONFIRMATION'] = 'Подтверждение'
+app.config['ADMINS'] = app.config['MAIL_USERNAME']
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 
 ###########################################################################

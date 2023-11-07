@@ -24,18 +24,24 @@
                     <button type="submit" class="opacity">ОТПРАВИТЬ</button>
                 </form>
                 <div class="register-forget opacity">
-                    <a href="/register">Регистрация</a>
-                    <a href="">Забыли пароль?</a>
+                    <a href="{{ url_for('register') }}">Регистрация</a>
+                    <a href="{{ url_for('restoring_access') }}">Забыли пароль?</a>
                 </div>
-            {% else %}
+            {% elif endpoint == 'register' %}
                 <h1-login class="opacity">Регистрация</h1-login>
-                    <form>
-                        <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" autocomplete="username"/>
-                        <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" autocomplete="new-password"/>
-                        <input type="email" name="email" id="email" placeholder="ПОЧТОВЫЙ АДРЕС" autocomplete="email"/>
-                        <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
-                        <button type="submit" class="opacity">ОТПРАВИТЬ</button>
-                    </form>
+                <form>
+                    <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" autocomplete="username"/>
+                    <input type="password" name="password" id="password" placeholder="ПАРОЛЬ" autocomplete="new-password"/>
+                    <input type="email" name="email" id="email" placeholder="ПОЧТОВЫЙ АДРЕС" autocomplete="email"/>
+                    <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
+                    <button type="submit" class="opacity">ОТПРАВИТЬ</button>
+                </form>
+            {% else %}
+                <h1-login class="opacity">Восстановление доступа</h1-login>
+                <form>
+                    <input type="email" name="email" id="email" placeholder="ПОЧТОВЫЙ АДРЕС" autocomplete="email"/>
+                    <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
+                    <button type="submit" class="opacity">ОТПРАВИТЬ</button>
             {% endif %}
             </form>
         </div>
