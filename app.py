@@ -20,7 +20,7 @@ def login():
         user = db.session.query(User).filter(User.username == username).first()
         if user and user.check_password(password):
             login_user(user, remember=True)
-            flash('Вы вошли в систему', 'success')
+            # flash('Вы вошли в систему', 'success')
             return redirect(url_for('notes'))
         else:
             flash('Неправильное имя пользователя или пароль', 'danger')
@@ -50,7 +50,7 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-            flash('Пользователь успешно добавлен', 'success')
+            # flash('Пользователь успешно добавлен', 'success')
             return redirect(url_for('login'))
         except Exception:
             flash('При добавлении пользователя произошла ошибка', 'danger')
@@ -71,7 +71,7 @@ def about():
     return render_template('about.html', endpoint=endpoint)
 
 
-@app.route('/contact/<string:name>')
+@app.route('/contact/<string:name>')  # переписать
 def contact(name):
     endpoint = request.endpoint
     return render_template('contact.html', name=name, endpoint=endpoint)
@@ -80,11 +80,18 @@ def contact(name):
 @app.route('/notes')
 def notes():
     endpoint = request.endpoint
-    notes = Note.query.order_by(Note.data.desc()).all()
-    return render_template('notes.html', notes=notes, endpoint=endpoint)
-
+    if current_user.is_authenticated:
+        user = current_user
+        notes = (Note.query
+                     .filter(Note.user_id == user.id)
+                     .order_by(Note.data.desc())
+                     .all())
+        return render_template('notes.html', notes=notes, endpoint=endpoint)
+    else:
+        return render_template('notes.html', endpoint=endpoint)
 
 @app.route('/create_note', methods=['GET', 'POST'])
+@login_required
 def create_note():
     if request.method == 'POST':
         title = request.form['title']
@@ -104,6 +111,7 @@ def create_note():
 
 
 @app.route('/notes/<int:id>')
+@login_required
 def note(id):
     note = Note.get_by_id(id)
     if not note:
@@ -112,6 +120,7 @@ def note(id):
 
 
 @app.route('/notes/<int:id>/delete')
+@login_required
 def delete_note(id):
     note = Note.query.get_or_404(id)
     try:
@@ -123,6 +132,7 @@ def delete_note(id):
 
 
 @app.route('/notes/<int:id>/confirmation')
+@login_required
 def confirmation(id):
     note = Note.get_by_id(id)
     if not note:
@@ -131,6 +141,7 @@ def confirmation(id):
 
 
 @app.route('/notes/<int:id>/favorite')
+@login_required
 def favorite(id):
     note = (db.session.query(Note)
             .filter(Note.id == id)
@@ -147,6 +158,7 @@ def favorite(id):
 
 
 @app.route('/notes/<int:id>/unfavorite')
+@login_required
 def unfavorite(id):
     note = (db.session.query(Note)
             .filter(Note.id == id)
@@ -165,6 +177,7 @@ def unfavorite(id):
 
 
 @app.route('/notes/<int:id>/edit', methods=['POST', 'GET'])
+@login_required
 def edit_note(id):
     endpoint = request.endpoint
     if request.method == 'POST':

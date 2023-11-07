@@ -5,38 +5,56 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5" style="width: 200px; position: absolute; top: 40px; right: 50px;">
-  <div class="input-group">
-    <span class="input-group-text" id="basic-addon1">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
-        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
-      </svg>
-    </span>
-    <input type="text" class="form-control" placeholder="Фильтр" aria-label="Фильтр" aria-describedby="basic-addon1">
+{% if current_user.is_authenticated %}
+<div class="container mt-5">
+    <div class="row justify-content-md-center">
+    <div class="col col-lg-2">
+    </div>
+    <div class="col align-self-center">
+      {% if notes|length > 0 %}
+        <h1 style="text-align: center;">Все заметки</h1>
+      {% else %}
+        <h1 style="text-align: center;">У вас пока нет заметок</h1>
+      {% endif %}
+    </div>
+    <div class="col col-lg-2">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+          </svg>
+        </span>
+        <input type="text" class="form-control" placeholder="Фильтр" aria-label="Фильтр" aria-describedby="basic-addon1" id="filterInput">
+      </div>
+    </div>
   </div>
-</div>
-<div class="container mt-5" style="width: 800px;">
-  <h1 style="text-align: center;">Все заметки</h1>
   {% if notes|length > 0 %}
     {% for note in notes %}
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ note.title }}</h5>
-          <p class="card-text">{{ note.intro }}</p>
+      <div class="card container col-lg-8 p-0">
+        <div class="card-body container">
+          <h5 class="card-title col-8">{{ note.title }}</h5>
+          <il class="col">{% include 'includes/btn.html' %}</il>
+        </div>
+        <div class="card-body container">
+          <p class="card-text row-md">{{ note.intro }}</p>
           <p><b>Автор: {{ note.author.username }}</b></p>
-
-          {% include 'includes/btn.html' %}
 
           <a href="/notes/{{ note.id }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
               Подробнее
           </a>
-          <note class="date">Cоздан: {{ note.data }}</note>
+          <note class="date col">Cоздан: {{ note.data }}</note>
         </div>
-        <div class="b-example-divider"></div>
+        <div class="b-example-divider" style="width: 100%;"></div>
       </div>
     {% endfor %}
   {% else %}
-    <p style="text-align: center;">У вас пока нет заметок</p>
-  {% endif %}
+{% endif %}
 </div>
+{% else %}
+<div class="container mt-5">
+  <h1 style="text-align: center;">Войдите или зарегистрируйтесь</h1>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/filter-notes.js')}}"></script>
 {% endblock %}

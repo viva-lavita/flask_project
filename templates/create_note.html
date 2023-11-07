@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container mt-5" style="width: 500px;">
+  <div class="container mt-5 col-lg-7">
     {% if endpoint == 'create_note' %}
-    <h1>Создай новую заметку</h1>
+    <h1 style="text-align: center; word-wrap: break-word;">Создай новую заметку</h1>
     {% else %}
-    <h1>{{ note.title }}</h1>
+    <h1 style="text-align: center; word-wrap: break-word;">{{ note.title }}</h1>
     {% endif %}
     <form method="post">
       <div class="form-control-wrapper">
@@ -22,7 +22,7 @@
         <span class="character-counter" id="titleCounter"></span>
       </div><br>
       <div class="form-control-wrapper">
-        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 200px;" maxlength="200">{% if endpoint == 'create_note' %} {% else %}{{ note.intro }}{% endif %}</textarea>
+        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 100px;" maxlength="200">{% if endpoint == 'create_note' %} {% else %}{{ note.intro }}{% endif %}</textarea>
         <span class="character-counter" id="introCounter"></span>
       </div><br>
       <div class="form-control-wrapper">

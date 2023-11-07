@@ -5,11 +5,14 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
+from dotenv import load_dotenv
 
 
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+load_dotenv()
 
 #######################################
 # Flask-SQLAlchemy
@@ -19,7 +22,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-# app.app_context().push()
 migrate = Migrate(app, db)
 app.config['SQLALCHEMY_MIGRATE_REPO'] = os.path.join(basedir, 'db_repository')
 
@@ -51,6 +53,7 @@ app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') or 'YOU_MAIL@gmail.com'
+print(app.config['MAIL_USERNAME'])
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or 'password'
 app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
