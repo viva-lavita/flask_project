@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-{% if current_user.is_authenticated %}
+{% if endpoint == 'public' or current_user.is_authenticated %}
 <div class="container mt-5">
     <div class="row justify-content-md-center">
     <div class="col col-lg-2">
@@ -14,7 +14,13 @@
       {% if notes|length > 0 %}
         <h1 style="text-align: center;">Все заметки</h1>
       {% else %}
-        <h1 style="text-align: center;">У вас пока нет заметок</h1>
+        {% if endpoint == 'public' %}
+          <h1 style="text-align: center;">Публичные заметки отсутствуют</h1>
+        {% elif endpoint == 'favorites' %}
+          <h1 style="text-align: center;">У вас нет избранных заметок</h1>
+        {% else %}
+          <h1 style="text-align: center;">Вы пока не написали ни одной заметки</h1>
+        {% endif %}
       {% endif %}
     </div>
     <div class="col col-lg-2">
@@ -48,7 +54,7 @@
       </div>
     {% endfor %}
   {% else %}
-{% endif %}
+  {% endif %}
 </div>
 {% else %}
 <div class="container mt-5">

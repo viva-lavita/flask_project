@@ -11,7 +11,7 @@ function countCharacters(inputId, counterId, limit) {
   var textInput = document.getElementById("text");
 
   titleInput.addEventListener("input", function() {
-    countCharacters("title", "titleCounter", 50);
+    countCharacters("title", "titleCounter", 100);
   });
 
   introInput.addEventListener("input", function() {
@@ -19,5 +19,5 @@ function countCharacters(inputId, counterId, limit) {
   });
 
   textInput.addEventListener("input", function() {
-    countCharacters("text", "textCounter", 2000);
+    countCharacters("text", "textCounter", 10000);
   });
