@@ -9,9 +9,8 @@ from models import Note
 def notes():
     endpoint = request.endpoint
     if current_user.is_authenticated:
-        user = current_user
         notes = (Note.query
-                     .filter(Note.user_id == user.id)
+                     .filter(Note.user_id == current_user.id)
                      .order_by(Note.data.desc())
                      .all())
         return render_template('notes.html', notes=notes, endpoint=endpoint)
@@ -23,11 +22,12 @@ def notes():
 @login_required
 def create_note():
     if request.method == 'POST':
-        title = request.form['title']
-        intro = request.form['intro']
-        text = request.form['text']
-        user = request.args.get('user_id')
-        note = Note(title=title, intro=intro, text=text, user_id=user)
+        note = Note(title=request.form['title'],
+                    intro=request.form['intro'],
+                    text=request.form['text'],
+                    user_id=current_user.id,
+                    public=request.form.get('public'))
+        print(note.public)
         try:
             db.session.add(note)
             db.session.commit()
@@ -40,7 +40,7 @@ def create_note():
 
 
 @app.route('/notes/<int:id>')
-@login_required
+# @login_required
 def note(id):
     note = Note.get_by_id(id)
     if not note:
@@ -72,9 +72,7 @@ def confirmation(id):
 @app.route('/notes/<int:id>/favorite')
 @login_required
 def favorite(id):
-    note = (db.session.query(Note)
-            .filter(Note.id == id)
-            .first())
+    note = Note.get_by_id(id)
     user = current_user
     if not note or not user:
         return f'Заметка или пользователь не найдены {user}'
@@ -89,18 +87,19 @@ def favorite(id):
 @app.route('/notes/<int:id>/unfavorite')
 @login_required
 def unfavorite(id):
-    note = (db.session.query(Note)
-            .filter(Note.id == id)
-            .first())
+    note = Note.get_by_id(id)
     user = current_user
     if not note or not user:
         return 'Заметка или пользователь не найдены'
-    if note not in user.notes:
+    if note not in user.favorite_notes:
         return 'Заметка в избранном пользователя не найдена'
     user.favorite_notes.remove(note)
     try:
         db.session.commit()
-        return redirect('/notes/' + str(id), code=302)
+        if user.is_author(note):
+            return redirect('/notes/' + str(id), code=302)
+        else:
+            return redirect('/notes/public', code=302)
     except Exception:
         return 'При удалении заметки произошла ошибка'
 
@@ -110,18 +109,16 @@ def unfavorite(id):
 def edit_note(id):
     endpoint = request.endpoint
     if request.method == 'POST':
-        title = request.form['title']
-        intro = request.form['intro']
-        text = request.form['text']
         try:
             note = Note.get_by_id(id)
-            note.title = title
-            note.intro = intro
-            note.text = text
+            note.title = request.form.get('title')
+            note.intro = request.form.get('intro')
+            note.text = request.form.get('text')
+            note.public = request.form.get('public')
             db.session.commit()
             return redirect('/notes/' + str(id), code=302)
-        except Exception:
-            return 'При обновлении заметки произошла ошибка'
+        except Exception as e:
+            return f'При обновлении заметки произошла ошибка {e}'
     note = Note.get_by_id(id)
     if not note:
         return 'Заметка не найдена'
@@ -138,6 +135,13 @@ def favorites():
         return render_template('notes.html', notes=notes, endpoint=endpoint)
     else:
         return render_template('notes.html', endpoint=endpoint)
+
+
+@app.route('/notes/public')
+def public():
+    endpoint = request.endpoint
+    notes = Note.query.filter_by(public='on').order_by(Note.data.desc()).all()
+    return render_template('notes.html', notes=notes, endpoint=endpoint)
 
 
 if __name__ == '__main__':

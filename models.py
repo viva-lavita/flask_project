@@ -74,6 +74,10 @@ class User(db.Model, UserMixin):
         if not self.favorite_notes:
             return False
         return note in self.favorite_notes
+    
+    def is_author(self, note):
+        """ Проверка заметки на автора """
+        return self.id == note.user_id
 
     @classmethod
     def get_by_id(cls, id_) -> 'User':
@@ -86,7 +90,7 @@ class User(db.Model, UserMixin):
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), nullable=False, default=' ')
+    title = db.Column(db.String(100), nullable=False, default=' ')
     intro = db.Column(db.String(200), nullable=False, default=' ')
     text = db.Column(db.Text, nullable=False, default=' ')
     user_id = db.Column(db.Integer,
@@ -99,6 +103,7 @@ class Note(db.Model):
                                 backref=db.backref('favorite_notes',
                                                    lazy=True),
                                 lazy='subquery')
+    public = db.Column(db.String(8), default=None)
 
 
     def __repr__(self):

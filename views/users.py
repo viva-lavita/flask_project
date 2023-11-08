@@ -1,5 +1,6 @@
 import random
 import string
+import logging
 
 from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, login_user, logout_user, current_user
@@ -7,6 +8,9 @@ from config import mail, Message
 
 from config import app, db
 from models import User
+
+
+logger = logging.getLogger('my_logger')
 
 
 @app.route('/admin/') # дописать админку
@@ -28,7 +32,13 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=True)
             # flash('Вы вошли в систему', 'success')
-            return redirect(url_for('notes'))
+
+            # try:
+            #     a = 2/0
+            #     raise ValueError('Something went wrong')
+            # except ValueError as e:
+            #     logger.error(str(e))             # !!!!!дотестить логирование
+            # return redirect(url_for('notes'))
         else:
             flash('Неправильное имя пользователя или пароль', 'danger')
             return render_template('login.html', endpoint=endpoint)
@@ -71,7 +81,7 @@ def register():
 
 
 @app.route('/restoring_access', methods=['POST', 'GET'])
-def restoring_access():
+def restoring_access(): # Явно нужно переписать + убрать текст
     endpoint = request.endpoint
     if current_user.is_authenticated:
         return redirect(url_for('notes'))

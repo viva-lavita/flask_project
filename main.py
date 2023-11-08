@@ -1,6 +1,3 @@
-# from flask import flash, render_template, request, redirect, url_for
-# from flask_login import login_required, login_user, logout_user, current_user
-
 from config import app, db
 
 from views.app import *
@@ -10,19 +7,28 @@ if not app.debug:
     import logging
     from logging.handlers import SMTPHandler
 
-    credentials = None
-    if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
-        credentials = (app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-
     mail_handler = SMTPHandler(
-        (app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
-        'no-reply@' + app.config['MAIL_SERVER'],
-        app.config['ADMINS'],
-        'NoteVi failure',
-        credentials
+        mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
+        fromaddr=app.config['MAIL_USERNAME'],
+        toaddrs='artyomsopin@yandex.ru',  # убрать потом
+        subject='Error occurred!',
+        credentials=(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD']),
+        secure=()
     )
     mail_handler.setLevel(logging.ERROR)
-    app.logger.addHandler(mail_handler)
+    logger = logging.getLogger()
+    logger.addHandler(mail_handler)
+
+file_handler = logging.FileHandler('app.log')
+file_handler.setLevel(logging.ERROR)
+
+# Создание форматтера для указания формата записи логов
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Получение корневого логгера
+logger = logging.getLogger()
+logger.addHandler(file_handler)
 
 if __name__ == '__main__':
     with app.app_context():

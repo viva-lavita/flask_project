@@ -14,12 +14,17 @@
               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
                 <a class="dropdown-item" href="{{ url_for('notes') }}">Все заметки</a>
                 <a class="dropdown-item" href="{{ url_for('favorites') }}">Избранные</a>
-                <a class="dropdown-item" href="#">Еще не придумано</a>
+                <a class="dropdown-item" href="{{ url_for('public') }}">Публичные заметки</a>
               </div>
           </div>
           </li>
           {% else %}
-            <a class="nav-link active" aria-current="page" href="{{ url_for('notes') }}">Заметки</a>
+            <div class="dropdown">
+              <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
+                  <a class="dropdown-item" href="{{ url_for('public') }}">Публичные заметки</a>
+                </div>
+            </div>
           {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="#">Бот</a>
