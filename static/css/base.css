@@ -142,3 +142,12 @@ body {
 .bd-mode-toggle .dropdown-menu .active .bi {
   display: block !important;
 }
+
+p {
+  white-space: pre-line;
+}
+
+/* h5 {
+  white-space: pre-line;
+  text-align : left;
+} */

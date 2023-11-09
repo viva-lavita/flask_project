@@ -74,7 +74,8 @@ def register():
             db.session.commit()
             # flash('Пользователь успешно добавлен', 'success')
             return redirect(url_for('login'))
-        except Exception:
+        except Exception as e:
+            print(e)
             flash('При добавлении пользователя произошла ошибка', 'danger')
             return redirect(url_for('login'))
     return render_template('login.html', endpoint=endpoint)

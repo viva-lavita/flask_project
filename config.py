@@ -1,12 +1,14 @@
 import os
 
 from flask import Flask
+from flask_caching import Cache
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from dotenv import load_dotenv
+import psycopg2
 
 
 app = Flask(__name__)
@@ -18,13 +20,15 @@ load_dotenv()
 #######################################
 # Flask-SQLAlchemy
 #######################################
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI') or \
         'sqlite:///' + os.path.join(basedir, 'test.db')
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 app.config['SQLALCHEMY_MIGRATE_REPO'] = os.path.join(basedir, 'db_repository')
+app.config['POSTGRES_PASSWORD'] = os.environ.get('POSTGRES_PASSWORD')
+
 
 
 #######################################
@@ -58,15 +62,24 @@ app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') or 'YOU_MAIL@gmail.com'
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or 'password'
 app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
-# app.config['SECURITY_EMAIL_SENDER'] = app.config['MAIL_USERNAME']
-# app.config['SECURITY_EMAIL_SUBJECT_REGISTER'] = 'Регистрация'
-# app.config['SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'] = 'Смена пароля'
-# app.config['SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE'] = 'Смена пароля'
-# app.config['SECURITY_EMAIL_SUBJECT_CONFIRMATION'] = 'Подтверждение'
+app.config['SECURITY_EMAIL_SENDER'] = app.config['MAIL_USERNAME']
 app.config['ADMINS'] = [app.config['MAIL_USERNAME']]
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
+
+
+#######################################
+# Flask-Cache
+#######################################
+# app.config['CACHE_TYPE'] = os.environ.get('CACHE_TYPE') or 'SimpleCache'
+# app.config['CACHE_REDIS_HOST'] = os.environ.get('CACHE_REDIS_HOST') or 'localhost'
+# app.config['CACHE_REDIS_PORT'] = os.environ.get('CACHE_REDIS_PORT') or 6379
+# app.config['CACHE_REDIS_DB'] = os.environ.get('CACHE_REDIS_DB') or 0
+# app.config['CACHE_REDIS_URL'] = os.environ.get('CACHE_REDIS_URL') or None
+# app.config['CACHE_REDIS_PASSWORD'] = os.environ.get('CACHE_REDIS_PASSWORD')
+# app.config['CACHE_DEFAULT_TIMEOUT'] = 10
+# cache = Cache(app)
 
 
 ###########################################################################

@@ -1,61 +1,40 @@
-{% extends 'base.html' %}
-
-{% block title %}
-О сайте
-{% endblock %}
-
-{% block styles %}
-  <link href="static/css/contact.css" rel="stylesheet">
-{% endblock %}
-
-{% block content %}
-    <!-- <h1>Контакты {{ name }}</h1>
-    <div class="b-example-divider"></div>
-    <div class="my-5">
-        <div class="p-5 text-center bg-body-tertiary">
-          <div class="container py-5">
-            <h1 class="text-body-emphasis">Full-width jumbotron</h1>
-            <p class="col-lg-8 mx-auto lead">
-              This takes the basic jumbotron above and makes its background edge-to-edge with a <code>.container</code> inside to align content. Similar to above, it's been recreated with built-in grid and utility classes.
-            </p>
-          </div>
-        </div>
-    </div>
-    <div class="b-example-divider"></div>
-    <div class="container my-5">
-        <div class="p-5 text-center bg-body-tertiary rounded-3">
-          <h1 class="text-body-emphasis">Basic jumbotron</h1>
-          <p class="lead">
-            This is a simple Bootstrap jumbotron that sits within a <code>.container</code>, recreated with built-in utility classes.
-          </p>
-        </div>
-      </div> -->
-      <div id="photo">
-        <ul>
-          <li style="--x1: 2; --x2: 6; --y1: 1; --y2: 4;">
-            <img src="https://picsum.photos/600/600?random=1" alt="">
-          </li>
-          <li style="--x1: 6; --x2: 8; --y1: 2; --y2: 4;">
-            <img src="https://picsum.photos/600/600?random=2" alt="">
-          </li>
-          <li style="--x1: 1; --x2: 4; --y1: 4; --y2: 7;">
-            <img src="https://picsum.photos/600/600?random=3" alt="">
-          </li>
-          <li style="--x1: 4; --x2: 7; --y1: 4; --y2: 7;">
-            <img src="https://picsum.photos/600/600?random=4" alt="">
-          </li>
-          <li style="--x1: 7; --x2: 9; --y1: 4; --y2: 6;">
-            <img src="https://picsum.photos/600/600?random=5" alt="">
-          </li>
-          <li style="--x1: 2; --x2: 4; --y1: 7; --y2: 9;">
-            <img src="https://picsum.photos/600/600?random=7" alt="">
-          </li>
-          <li style="--x1: 4; --x2: 7; --y1: 7; --y2: 10;">
-            <img src="https://picsum.photos/600/600?random=8" alt="">
-          </li>
-          <li style="--x1: 7; --x2: 10; --y1: 6; --y2: 9;">
-            <img src="https://picsum.photos/600/600?random=9" alt="">
-          </li>
-        </ul>
-      </div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/static/css/contact.css" rel="stylesheet">
+  <title>Кооооооооонфиденциальность!</title>
+</head>
+<body>
+  <main>
+    <ul>
+      <li style="--x1: 2; --x2: 6; --y1: 1; --y2: 4;">
+        <img src="{{ url_for('static', filename='img/contact/1.png')}}" alt="">
+      </li>
+      <li style="--x1: 6; --x2: 8; --y1: 2; --y2: 4;">
+        <img src="{{ url_for('static', filename='img/contact/7.jpg')}}" alt="">
+      </li>
+      <li style="--x1: 1; --x2: 4; --y1: 4; --y2: 7;">
+        <img src="{{ url_for('static', filename='img/contact/1.png')}}" alt="">
+      </li>
+      <li style="--x1: 4; --x2: 7; --y1: 4; --y2: 7;">
+        <img src="{{ url_for('static', filename='img/contact/7.jpg')}}" alt="">
+      </li>
+      <li style="--x1: 7; --x2: 9; --y1: 4; --y2: 6;">
+        <img src="{{ url_for('static', filename='img/contact/7.jpg')}}" alt="">
+      </li>
+      <li style="--x1: 2; --x2: 4; --y1: 7; --y2: 9;">
+        <img src="{{ url_for('static', filename='img/contact/7.jpg')}}" alt="">
+      </li>
+      <li style="--x1: 4; --x2: 7; --y1: 7; --y2: 10;">
+        <img src="{{ url_for('static', filename='img/contact/1.png')}}" alt="">
+      </li>
+      <li style="--x1: 7; --x2: 10; --y1: 6; --y2: 9;">
+        <img src="{{ url_for('static', filename='img/contact/7.jpg')}}" alt="">
+      </li>
+    </ul>
+  </main>
+  
+</body>
+</html>

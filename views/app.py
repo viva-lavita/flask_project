@@ -3,6 +3,7 @@ from flask import render_template, request, url_for
 from config import app, db
 from .notes import *
 from .users import *
+from .test_api import *
 
 
 @app.errorhandler(404)
@@ -30,7 +31,22 @@ def about():
     return render_template('about.html', endpoint=endpoint)
 
 
-@app.route('/contact/<string:name>')  # переписать
-def contact(name):
+@app.route('/contact')  # переписать
+def contact():
     endpoint = request.endpoint
-    return render_template('contact.html', name=name, endpoint=endpoint)
+    return render_template('contact.html', endpoint=endpoint)
+
+
+@app.route('/conditions')
+def conditions():
+    return render_template('site_stub.html')
+
+
+@app.route('/bot')
+def bot():
+    return render_template('site_stub.html')
+
+
+@app.route('/telegram')
+def telegram():
+    return render_template('site_stub.html')

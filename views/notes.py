@@ -11,7 +11,7 @@ def notes():
     if current_user.is_authenticated:
         notes = (Note.query
                      .filter(Note.user_id == current_user.id)
-                     .order_by(Note.data.desc())
+                     .order_by(Note.id.desc())
                      .all())
         return render_template('notes.html', notes=notes, endpoint=endpoint)
     else:
@@ -40,7 +40,6 @@ def create_note():
 
 
 @app.route('/notes/<int:id>')
-# @login_required
 def note(id):
     note = Note.get_by_id(id)
     if not note:
@@ -131,7 +130,7 @@ def favorites():
     endpoint = request.endpoint
     if current_user.is_authenticated:
         user = current_user
-        notes = (Note.query.filter(Note.favorites.contains(user))).all()
+        notes = Note.query.filter(Note.favorites.contains(user)).order_by(Note.id.desc()).all()
         return render_template('notes.html', notes=notes, endpoint=endpoint)
     else:
         return render_template('notes.html', endpoint=endpoint)
@@ -140,11 +139,11 @@ def favorites():
 @app.route('/notes/public')
 def public():
     endpoint = request.endpoint
-    notes = Note.query.filter_by(public='on').order_by(Note.data.desc()).all()
+    notes = Note.query.filter_by(public='on').order_by(Note.id.desc()).all()
     return render_template('notes.html', notes=notes, endpoint=endpoint)
 
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
     app.run(debug=True)
