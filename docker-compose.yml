@@ -8,7 +8,9 @@ volumes:
 services:
   db:
     image: postgres:13.10
-    env_file: .env
+    env_file:
+      - .env
+      - .flaskenv
     volumes:
       - pg_data:/var/lib/postgresql/data/
   app:
@@ -17,21 +19,30 @@ services:
     entrypoint: python main.py
     env_file:
       - .env
+      - .flaskenv
+    # environment:
+    #   FLASK_DEBUG: "true"
+    # Перезапускаем сервис в случае падения 
+    restart: on-failure
+    # command: python main.py run -h 0.0.0.0 -p 5000
     ports:
       - '5000:5000'
     depends_on:
       - db
     volumes:
+      - .:/app
       - static:/app/static/
       - media:/app/media/
   redis:
-    image: redis
+    image: "redis:alpine"
     env_file: .env
     container_name: redis-container
     ports:
       - "6379:6379"
+    depends_on:
+      - db
   nginx:
-    image: nginx:1.21.6
+    image: nginx:1.19.3
     depends_on:
       - app
     ports:

@@ -1,7 +1,7 @@
 from flask import request, jsonify
 import requests
 
-from config import app
+from .app import app
 
 
 

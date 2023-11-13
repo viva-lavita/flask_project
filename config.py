@@ -1,5 +1,6 @@
 import os
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_caching import Cache
 from flask_mail import Mail, Message
@@ -7,8 +8,6 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
-from dotenv import load_dotenv
-import psycopg2
 
 
 app = Flask(__name__)
@@ -22,7 +21,6 @@ load_dotenv()
 #######################################
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI') or \
         'sqlite:///' + os.path.join(basedir, 'test.db')
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -69,17 +67,17 @@ app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
 
-#######################################
+######################################
 # Flask-Cache
-#######################################
-# app.config['CACHE_TYPE'] = os.environ.get('CACHE_TYPE') or 'SimpleCache'
-# app.config['CACHE_REDIS_HOST'] = os.environ.get('CACHE_REDIS_HOST') or 'localhost'
-# app.config['CACHE_REDIS_PORT'] = os.environ.get('CACHE_REDIS_PORT') or 6379
-# app.config['CACHE_REDIS_DB'] = os.environ.get('CACHE_REDIS_DB') or 0
-# app.config['CACHE_REDIS_URL'] = os.environ.get('CACHE_REDIS_URL') or None
-# app.config['CACHE_REDIS_PASSWORD'] = os.environ.get('CACHE_REDIS_PASSWORD')
-# app.config['CACHE_DEFAULT_TIMEOUT'] = 10
-# cache = Cache(app)
+######################################
+app.config['CACHE_TYPE'] = os.environ.get('CACHE_TYPE') or 'SimpleCache'
+app.config['CACHE_REDIS_HOST'] = os.environ.get('CACHE_REDIS_HOST') or 'localhost'
+app.config['CACHE_REDIS_PORT'] = os.environ.get('CACHE_REDIS_PORT') or 6379
+app.config['CACHE_REDIS_DB'] = os.environ.get('CACHE_REDIS_DB') or 0
+app.config['CACHE_REDIS_URL'] = os.environ.get('CACHE_REDIS_URL') or None
+app.config['CACHE_REDIS_PASSWORD'] = os.environ.get('CACHE_REDIS_PASSWORD')
+app.config['CACHE_DEFAULT_TIMEOUT'] = os.environ.get('CACHE_DEFAULT_TIMEOUT') or 10
+cache = Cache(app)
 
 
 ###########################################################################

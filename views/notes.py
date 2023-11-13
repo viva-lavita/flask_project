@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect
 from flask_login import login_required, current_user
 
-from config import app, db
+from .app import app, db
 from models import Note
 
 

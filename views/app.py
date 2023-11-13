@@ -1,6 +1,6 @@
 from flask import render_template, request, url_for
 
-from config import app, db
+from config import app, db, cache
 from .notes import *
 from .users import *
 from .test_api import *
@@ -20,6 +20,7 @@ def internal_error(error):
 
 @app.route('/')
 @app.route('/index')
+@cache.cached(timeout=60)
 def index():
     endpoint = request.endpoint
     return render_template('index.html', endpoint=endpoint)

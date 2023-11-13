@@ -6,7 +6,7 @@ from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, login_user, logout_user, current_user
 from config import mail, Message
 
-from config import app, db
+from .app import app, db
 from models import User
 
 

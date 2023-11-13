@@ -2,6 +2,7 @@ from config import app, db
 from views.app import *
 
 
+# Отправка логирования на почту
 if not app.debug:
     import logging
     from logging.handlers import SMTPHandler
@@ -18,6 +19,7 @@ if not app.debug:
     logger = logging.getLogger()
     logger.addHandler(mail_handler)
 
+# Настройка файла логирования !!!!!!!!!!добавить ограничение размера!!!!!!!!!
 file_handler = logging.FileHandler('app.log')
 file_handler.setLevel(logging.ERROR)
 
@@ -31,7 +33,11 @@ file_handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(file_handler)
 
-if __name__ == '__main__':
-    # with app.app_context():
-    #     db.create_all()
-    app.run(debug=True)
+# Точка входа. Можно убрать, но нужно тогда прописать
+# команды для создания и миграций бд + прописать в
+# докерфайле или в компоузе комманду старта приложения.
+# Сейчас там указана точка входа.
+if __name__ == '__main__':  # для разработки.
+    with app.app_context():
+        db.create_all()
+    app.run(host='0.0.0.0', port=5000)

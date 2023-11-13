@@ -1,1 +1,5 @@
 FLASK_APP=main.py
+FLASK_DEBUG='true'
+# SQL_HOST=db
+# SQL_PORT=5432
+# DATABASE=postgres
