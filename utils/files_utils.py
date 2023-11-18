@@ -18,7 +18,8 @@ def get_file_path(filename) -> str:
 
 def get_file(filename) -> Optional[File]:
     """
-    Если файл существует, то возвращаем его, иначе создаем новый.
+    Если файл существует, то возвращает его, иначе создает
+    новый экземпляр модели.
     Дополнительно проверяет и корректирует имя файла.
     """
     if filename != '' and allowed_file(filename):
@@ -29,7 +30,6 @@ def get_file(filename) -> Optional[File]:
             path=get_file_path(filename)
         )
         return file
-    return None
 
 
 def add_and_save_files(files, note):
@@ -38,11 +38,13 @@ def add_and_save_files(files, note):
     """
     for uploaded_file in files:
         file = get_file(uploaded_file.filename)
-        if file and not note.files.contains(file):
+        if file:
             note.files.append(file)
             try:
                 uploaded_file.save(get_file_path(uploaded_file.filename))
                 db.session.add(file)
             except Exception as e:
-                raise Exception(f'При добавлении иллюстрации произошла ошибка: {e}')
+                raise Exception(
+                    f'При добавлении иллюстрации произошла ошибка: {e}'
+                )
     return note

@@ -32,8 +32,8 @@ favorites = db.Table(
     )
 )
 
-illustrations = db.Table(
-    'illustrations',
+note_file = db.Table(
+    'note_file',
     db.Column(
         'note_id', db.Integer, db.ForeignKey('note.id'), primary_key=True
     ),
@@ -41,6 +41,7 @@ illustrations = db.Table(
         'file_id', db.Integer, db.ForeignKey('file.id'), primary_key=True
     )
 )
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -109,9 +110,14 @@ class Note(db.Model):
                                                    lazy=True),
                                 lazy='subquery')
     public = db.Column(db.String(8), default=None)
+    files = db.relationship('File',
+                            secondary='note_file',
+                            lazy='subquery',
+                            backref=db.backref('notes',
+                                               lazy=True))
 
     def __repr__(self):
-        return '<Article %r>' % self.id  # обьект и его id
+        return '<Article %r>' % self.id
 
     @classmethod
     def get_by_id(cls, id_) -> 'Note':
@@ -126,13 +132,7 @@ class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     path = db.Column(db.String(255), nullable=False)
-    # note_id = db.Column(db.Integer, db.ForeignKey('note.id'), nullable=False)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    notes = db.relationship('Note',
-                            secondary='illustrations',
-                            lazy='subquery',
-                            backref=db.backref('files',
-                                               lazy=True))
 
     def __repr__(self):
         return '<File %r>' % self.id

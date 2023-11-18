@@ -1,7 +1,6 @@
 import os
 from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
-# from werkzeug.utils import secure_filename
 
 from config import app, db
 from models import Note, File
@@ -50,10 +49,10 @@ def note(id):
     note = Note.get_by_id(id)
     if not note:
         return redirect(url_for('notes'))
-    files = File.query.filter(File.notes.contains(note)).all()
+    # files = File.query.filter(File.notes.contains(note)).all()
     if not note:
         return 'Заметка не найдена'
-    return render_template('note.html', note=note, files=files)
+    return render_template('note.html', note=note)
 
 
 @app.route('/notes/<int:id>/delete')
@@ -112,10 +111,10 @@ def unfavorite(id):
         return 'При удалении заметки произошла ошибка'
 
 
-@app.route('/notes/<int:id>/edit', methods=['POST', 'GET'])
+@app.route('/notes/<int:note_id>/edit', methods=['POST', 'GET'])
 @login_required
-def edit_note(id):
-    note = Note.get_by_id(id)
+def edit_note(note_id):
+    note = Note.get_by_id(note_id)
     endpoint = request.endpoint
     if request.method == 'POST':
         note.title = request.form.get('title')
