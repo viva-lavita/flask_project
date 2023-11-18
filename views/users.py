@@ -78,6 +78,8 @@ def register():
             print(e)
             flash('При добавлении пользователя произошла ошибка', 'danger')
             return redirect(url_for('login'))
+    if current_user.is_authenticated:
+        return redirect(url_for('notes'))
     return render_template('login.html', endpoint=endpoint)
 
 

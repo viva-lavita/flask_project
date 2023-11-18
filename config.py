@@ -16,6 +16,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 load_dotenv()
 
+
 #######################################
 # Flask-SQLAlchemy
 #######################################
@@ -78,6 +79,14 @@ app.config['CACHE_REDIS_URL'] = os.environ.get('CACHE_REDIS_URL') or None
 app.config['CACHE_REDIS_PASSWORD'] = os.environ.get('CACHE_REDIS_PASSWORD')
 app.config['CACHE_DEFAULT_TIMEOUT'] = os.environ.get('CACHE_DEFAULT_TIMEOUT') or 10
 cache = Cache(app)
+
+
+######################################
+# Upload Files
+######################################
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'media/uploads')
+app.config['ALLOWED_EXTENSIONS'] = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
 
 
 ###########################################################################

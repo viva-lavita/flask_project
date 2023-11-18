@@ -1,3 +1,4 @@
+# import click
 from config import app, db
 from views.app import *
 
@@ -33,11 +34,15 @@ file_handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(file_handler)
 
-# Точка входа. Можно убрать, но нужно тогда прописать
-# команды для создания и миграций бд + прописать в
-# докерфайле или в компоузе комманду старта приложения.
-# Сейчас там указана точка входа.
-if __name__ == '__main__':  # для разработки.
+
+# with app.app_context():
+#     try:
+#         db.create_all()
+#     except Exception as e:
+#         print(f'Ошибка создания БД: + {e}')
+
+# # для локального запуска
+if __name__ == '__main__': 
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=5000)

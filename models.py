@@ -32,6 +32,15 @@ favorites = db.Table(
     )
 )
 
+illustrations = db.Table(
+    'illustrations',
+    db.Column(
+        'note_id', db.Integer, db.ForeignKey('note.id'), primary_key=True
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id'), primary_key=True
+    )
+)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -39,7 +48,6 @@ def load_user(user_id):
 
 
 class User(db.Model, UserMixin):
-    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(
         db.String(64), index=True, unique=True, nullable=False
@@ -53,20 +61,17 @@ class User(db.Model, UserMixin):
     updated_on = db.Column(
         db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow
     )
-
-    def __init__(self, email, username):
-        self.username = username
-        self.email = email
-        self.active = True
-        self.confirmed_at = datetime.utcnow()
+    is_active = db.Column(db.Boolean(), default=True)
 
     def __repr__(self):
         return '<User %r>' % self.username
 
     def set_password(self, password):
+        """ Генерация хэша пароля """
         self.password_hash = generate_password_hash(password)
 
     def check_password(self,  password):
+        """ Проверка пароля """
         return check_password_hash(self.password_hash, password)
 
     def is_favorite(self, note):
@@ -74,7 +79,7 @@ class User(db.Model, UserMixin):
         if not self.favorite_notes:
             return False
         return note in self.favorite_notes
-    
+
     def is_author(self, note):
         """ Проверка заметки на автора """
         return self.id == note.user_id
@@ -105,7 +110,6 @@ class Note(db.Model):
                                 lazy='subquery')
     public = db.Column(db.String(8), default=None)
 
-
     def __repr__(self):
         return '<Article %r>' % self.id  # обьект и его id
 
@@ -116,3 +120,24 @@ class Note(db.Model):
         Model.get_by_id(id)
         """
         return cls.query.session.get(cls, id_)
+
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    path = db.Column(db.String(255), nullable=False)
+    # note_id = db.Column(db.Integer, db.ForeignKey('note.id'), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    notes = db.relationship('Note',
+                            secondary='illustrations',
+                            lazy='subquery',
+                            backref=db.backref('files',
+                                               lazy=True))
+
+    def __repr__(self):
+        return '<File %r>' % self.id
+
+    def is_used(self, note):
+        if not self.notes:
+            return False
+        return note in self.notes

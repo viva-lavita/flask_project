@@ -1,8 +1,11 @@
-from flask import render_template, request, redirect
+import os
+from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
+# from werkzeug.utils import secure_filename
 
-from .app import app, db
-from models import Note
+from config import app, db
+from models import Note, File
+from utils.files_utils import add_and_save_files
 
 
 @app.route('/notes')
@@ -22,18 +25,21 @@ def notes():
 @login_required
 def create_note():
     if request.method == 'POST':
-        note = Note(title=request.form['title'],
-                    intro=request.form['intro'],
-                    text=request.form['text'],
-                    user_id=current_user.id,
-                    public=request.form.get('public'))
-        print(note.public)
+        note = Note(
+            title=request.form['title'],
+            intro=request.form['intro'],
+            text=request.form['text'],
+            user_id=current_user.id,
+            public=request.form.get('public')
+        )
         try:
+            note = add_and_save_files(request.files.getlist('files'), note)
             db.session.add(note)
             db.session.commit()
-            return redirect('/notes', code=302)
-        except Exception:
-            return 'При добавлении заметки произошла ошибка'
+        except Exception as e:
+            return f'При добавлении заметки произошла ошибка: {e}'
+
+        return redirect(url_for('note', id=note.id))
     else:
         endpoint = request.endpoint
         return render_template('create_note.html', endpoint=endpoint)
@@ -43,8 +49,11 @@ def create_note():
 def note(id):
     note = Note.get_by_id(id)
     if not note:
+        return redirect(url_for('notes'))
+    files = File.query.filter(File.notes.contains(note)).all()
+    if not note:
         return 'Заметка не найдена'
-    return render_template('note.html', note=note)
+    return render_template('note.html', note=note, files=files)
 
 
 @app.route('/notes/<int:id>/delete')
@@ -106,19 +115,20 @@ def unfavorite(id):
 @app.route('/notes/<int:id>/edit', methods=['POST', 'GET'])
 @login_required
 def edit_note(id):
+    note = Note.get_by_id(id)
     endpoint = request.endpoint
     if request.method == 'POST':
+        note.title = request.form.get('title')
+        note.intro = request.form.get('intro')
+        note.text = request.form.get('text')
+        note.public = request.form.get('public')
+        note.files.clear()
+        note = add_and_save_files(request.files.getlist('files'), note)
         try:
-            note = Note.get_by_id(id)
-            note.title = request.form.get('title')
-            note.intro = request.form.get('intro')
-            note.text = request.form.get('text')
-            note.public = request.form.get('public')
             db.session.commit()
-            return redirect('/notes/' + str(id), code=302)
+            return redirect(url_for('note', id=note.id), code=302)
         except Exception as e:
             return f'При обновлении заметки произошла ошибка {e}'
-    note = Note.get_by_id(id)
     if not note:
         return 'Заметка не найдена'
     return render_template('create_note.html', note=note, endpoint=endpoint)
@@ -141,9 +151,3 @@ def public():
     endpoint = request.endpoint
     notes = Note.query.filter_by(public='on').order_by(Note.id.desc()).all()
     return render_template('notes.html', notes=notes, endpoint=endpoint)
-
-
-if __name__ == '__main__':
-    # with app.app_context():
-    #     db.create_all()
-    app.run(debug=True)

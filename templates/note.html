@@ -16,6 +16,7 @@
       <p class="card-text">{{ note.text }}</p>
       <p><b>Автор: {{ note.author.username }}</b></p>
       <note class="date">Cоздан: {{ note.data }}</note>
+      <p class="card-text"> {{ files|length }} {{ 'файл(а)' if files|length > 1 else 'файл' }}</p>
     </div>
   </div>
 </div>
