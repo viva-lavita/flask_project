@@ -27,17 +27,17 @@
             </div>
           {% endif %}
           <li class="nav-item">
-            <a class="nav-link" href="#">Бот</a>
+            <a class="nav-link" href="{{ url_for('bot') }}">Бот</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Телега</a>
+            <a class="nav-link" href="{{ url_for('telegram') }}">Телега</a>
           <li class="nav-item">
           {% if endpoint != 'about' %}
             <a class="nav-link" href="{{ url_for('about') }}">О сайте</a>
           </li>
           {% endif %}
           <li class="nav-item">
-            <a class="nav-link disabled" aria-disabled="true">Шустрее</a>
+            <a class="nav-link disabled" aria-disabled="true">Работай шустрее</a>
           </li>
         </ul>
         {% if current_user.is_authenticated %}

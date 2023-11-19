@@ -6,7 +6,7 @@ from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, login_user, logout_user, current_user
 from config import mail, Message
 
-from config import app, db
+from .app import app, db
 from models import User
 
 
@@ -74,9 +74,12 @@ def register():
             db.session.commit()
             # flash('Пользователь успешно добавлен', 'success')
             return redirect(url_for('login'))
-        except Exception:
+        except Exception as e:
+            print(e)
             flash('При добавлении пользователя произошла ошибка', 'danger')
             return redirect(url_for('login'))
+    if current_user.is_authenticated:
+        return redirect(url_for('notes'))
     return render_template('login.html', endpoint=endpoint)
 
 

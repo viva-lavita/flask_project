@@ -7,10 +7,10 @@
 {% block content %}
 {% if endpoint == 'public' or current_user.is_authenticated %}
 <div class="container mt-5">
-    <div class="row justify-content-md-center">
-    <div class="col col-lg-2">
+  <div class="row justify-content-md-center">
+    <div class="col-sm-4 col-lg-2">
     </div>
-    <div class="col align-self-center">
+    <div class="col-sm-4 align-self-center">
       {% if notes|length > 0 %}
         <h1 style="text-align: center;">Все заметки</h1>
       {% else %}
@@ -23,7 +23,7 @@
         {% endif %}
       {% endif %}
     </div>
-    <div class="col col-lg-2">
+    <div class="col-sm-4 col-lg-2 mb-2">
       <div class="input-group">
         <span class="input-group-text" id="basic-addon1">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
@@ -38,7 +38,7 @@
     {% for note in notes %}
       <div class="card container col-lg-8 p-0">
         <div class="card-body container">
-          <h5 class="card-title col-8">{{ note.title }}</h5>
+          <h5 class="card-title col-6">{{ note.title }}</h5>
           <il class="col">{% include 'includes/btn.html' %}</il>
         </div>
         <div class="card-body container">
