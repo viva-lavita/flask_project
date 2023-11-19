@@ -13,7 +13,7 @@ def allowed_file(filename):
 
 def get_file_path(filename) -> str:
     """Возвращает путь файла по его имени."""
-    return os.path.join(app.config.get('UPLOAD_FOLDER'), filename)
+    return app.config.get('UPLOAD_FOLDER') + filename
 
 
 def get_file(filename) -> Optional[File]:
@@ -41,7 +41,7 @@ def add_and_save_files(files, note):
         if file:
             note.files.append(file)
             try:
-                uploaded_file.save(get_file_path(uploaded_file.filename))
+                uploaded_file.save(app.config.get('UPLOAD_FOLDER') + file.name)
                 db.session.add(file)
             except Exception as e:
                 raise Exception(

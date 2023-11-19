@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
 from config import app, db
-from models import Note
+from models import File, Note
 from utils.files_utils import add_and_save_files
 
 
@@ -113,13 +113,16 @@ def unfavorite(id):
 @login_required
 def edit_note(note_id):
     note = Note.get_by_id(note_id)
+    if not current_user.is_author(note):
+        return redirect(url_for('notes'))
     endpoint = request.endpoint
+    print(endpoint)
     if request.method == 'POST':
         note.title = request.form.get('title')
         note.intro = request.form.get('intro')
         note.text = request.form.get('text')
         note.public = request.form.get('public')
-        note.files.clear()
+        # note.files.clear()
         note = add_and_save_files(request.files.getlist('files'), note)
         try:
             db.session.commit()
@@ -128,7 +131,10 @@ def edit_note(note_id):
             return f'При обновлении заметки произошла ошибка {e}'
     if not note:
         return 'Заметка не найдена'
-    return render_template('create_note.html', note=note, endpoint=endpoint)
+    files = File.query.filter(File.notes.contains(note)).all()
+    return render_template(
+        'create_note.html', note=note, endpoint=endpoint, files=files
+    )
 
 
 @app.route('/notes/favorites')
@@ -141,6 +147,19 @@ def favorites():
         return render_template('notes.html', notes=notes, endpoint=endpoint)
     else:
         return render_template('notes.html', endpoint=endpoint)
+
+
+@app.route('/remove_files/<int:note_id>')
+def remove_files(note_id):
+    note = Note.get_by_id(note_id)
+    if not note:
+        return 'Заметка не найдена'
+    note.files = []  # дописать очистку памяти хранилища
+    try:
+        db.session.commit()
+        return redirect(url_for('edit_note', note_id=note_id), code=302)
+    except Exception as e:
+        return f'При обновлении заметки произошла ошибка {e}'
 
 
 @app.route('/notes/public')

@@ -6,7 +6,7 @@
 
 {% block content %}
     <div class="container mt-5 col-lg-7 card">
-      <h1>Загрузи новый файл</h1>
+      <h1>Загрузи новый конспект в md</h1>
       <form method="post" enctype="multipart/form-data">
         <div class="row">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -16,6 +16,11 @@
           <div class="col-1">
             <input type=submit value=Upload class="btn btn-success  mb-3 mt-5">
           </div>
+          {% for message in  get_flashed_messages() %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+          {% endfor %}
         </div>
       </div>
       </form>

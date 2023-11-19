@@ -12,12 +12,18 @@
       <h5 class="card-title col-8">{{ note.intro }}</h5>
       <il class="align-self-end">{% include 'includes/btn.html' %}</il>
     </div>
+    {% if note.files|length > 0 %}
+      {% for file in note.files %}
+        <div class="b-example-divider" style="width: 100%;"></div>
+        <img src="{{ url_for('static', filename='media/uploads/' + file.name) }}" class="card-img-top featurette-image img-fluid mx-auto" alt="..." style="height: 20%;">
+      {% endfor %}
+    {% endif %}
     <div class="card-body">
       <p class="card-text">{{ note.text }}</p>
       <p><b>Автор: {{ note.author.username }}</b></p>
       <note class="date">Cоздан: {{ note.data }}</note>
-      <p class="card-text"> {{ note.files|length }} {{ 'файл(а)' if note.files|length > 1 else 'файл' }}</p>
     </div>
+    <div class="b-example-divider" style="width: 100%;"></div>
   </div>
 </div>
 {% endblock %}
