@@ -5,6 +5,7 @@
 from datetime import datetime
 from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import current_user
 
 from config import db, login_manager
 
@@ -100,9 +101,10 @@ class Note(db.Model):
     intro = db.Column(db.String(200), nullable=False, default=' ')
     text = db.Column(db.Text, nullable=False, default=' ')
     user_id = db.Column(db.Integer,
-                        db.ForeignKey('user.id'),
-                        nullable=False,
-                        default=1)
+                        db.ForeignKey('user.id'),)
+                        # nullable=False,
+                        # default=1)
+                        # default=current_user.id)
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     favorites = db.relationship('User',
                                 secondary='favorites',

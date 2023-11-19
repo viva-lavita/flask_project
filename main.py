@@ -1,4 +1,3 @@
-# import click
 from config import app, db
 from views.app import *
 
@@ -35,14 +34,12 @@ logger = logging.getLogger()
 logger.addHandler(file_handler)
 
 
-# with app.app_context():
-#     try:
-#         db.create_all()
-#     except Exception as e:
-#         print(f'Ошибка создания БД: + {e}')
-
-# # для локального запуска
+# для локального запуска
 if __name__ == '__main__': 
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+            print('База данных создана')
+        except Exception as e:
+            print(f'Ошибка создания БД: + {e}')
     app.run(host='0.0.0.0', port=5000)

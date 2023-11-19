@@ -1,9 +1,8 @@
-import os
 from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
 from config import app, db
-from models import Note, File
+from models import Note
 from utils.files_utils import add_and_save_files
 
 
@@ -49,7 +48,6 @@ def note(id):
     note = Note.get_by_id(id)
     if not note:
         return redirect(url_for('notes'))
-    # files = File.query.filter(File.notes.contains(note)).all()
     if not note:
         return 'Заметка не найдена'
     return render_template('note.html', note=note)
