@@ -1,9 +1,9 @@
-from flask import render_template, request, redirect, url_for
+from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
 from config import app, db
 from models import File, Note
-from utils.files_utils import add_and_save_files
+from utils.files_utils import add_at_note_and_save_files
 
 
 @app.route('/notes')
@@ -31,12 +31,15 @@ def create_note():
             public=request.form.get('public')
         )
         try:
-            note = add_and_save_files(request.files.getlist('files'), note)
+            note = add_at_note_and_save_files(
+                request.files.getlist('files'), note
+            )
             db.session.add(note)
             db.session.commit()
         except Exception as e:
-            return f'При добавлении заметки произошла ошибка: {e}'
-
+            flash(f'При добавлении заметки произошла ошибка: {e}', 'danger')
+            return redirect(request.url)
+        flash('Заметка добавлена', 'success')
         return redirect(url_for('note', id=note.id))
     else:
         endpoint = request.endpoint
@@ -123,7 +126,7 @@ def edit_note(note_id):
         note.text = request.form.get('text')
         note.public = request.form.get('public')
         # note.files.clear()
-        note = add_and_save_files(request.files.getlist('files'), note)
+        note = add_at_note_and_save_files(request.files.getlist('files'), note)
         try:
             db.session.commit()
             return redirect(url_for('note', id=note.id), code=302)
@@ -143,7 +146,9 @@ def favorites():
     endpoint = request.endpoint
     if current_user.is_authenticated:
         user = current_user
-        notes = Note.query.filter(Note.favorites.contains(user)).order_by(Note.id.desc()).all()
+        notes = (Note.query.filter(Note.favorites.contains(user))
+                           .order_by(Note.id.desc())
+                           .all())
         return render_template('notes.html', notes=notes, endpoint=endpoint)
     else:
         return render_template('notes.html', endpoint=endpoint)

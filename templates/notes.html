@@ -5,6 +5,11 @@
 {% endblock %}
 
 {% block content %}
+{% for category, message in  get_flashed_messages(with_categories=true) %}
+  <div class="alert alert-{{ category }}" role="alert">
+      {{ message }}
+  </div>
+{% endfor %}
 {% if endpoint == 'public' or current_user.is_authenticated %}
 <div class="container mt-5">
   <div class="row justify-content-md-center">
@@ -45,7 +50,7 @@
           </div>
           <div class="card-body container">
             <p class="card-text">{{ note.intro }}</p>
-            <p><b>Автор: {{ note.author.username }}</b></p>
+            <p class="card-author"><b>Автор: {{ note.author.username }}</b></p>
             <a href="/notes/{{ note.id }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
                 Подробнее
             </a>

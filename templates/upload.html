@@ -11,13 +11,13 @@
         <div class="row">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="col-4">
-            <input type=file name=file class="form-control mb-3 mt-5">
+            <input type=file name=files class="form-control mb-3 mt-5" multiple="multiple">
           </div>
           <div class="col-1">
             <input type=submit value=Upload class="btn btn-success  mb-3 mt-5">
           </div>
-          {% for message in  get_flashed_messages() %}
-            <div class="alert alert-danger" role="alert">
+          {% for category, message in  get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">
                 {{ message }}
             </div>
           {% endfor %}

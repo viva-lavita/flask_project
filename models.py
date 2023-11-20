@@ -43,6 +43,16 @@ note_file = db.Table(
     )
 )
 
+conspect_file = db.Table(
+    'conspect_file',
+    db.Column(
+        'conspect_id', db.Integer, db.ForeignKey('conspect.id'), primary_key=True
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id'), primary_key=True
+    )
+)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -82,9 +92,9 @@ class User(db.Model, UserMixin):
             return False
         return note in self.favorite_notes
 
-    def is_author(self, note):
-        """ Проверка заметки на автора """
-        return self.id == note.user_id
+    def is_author(self, instance):
+        """ Проверка на авторство. """
+        return self.id == instance.user_id
 
     @classmethod
     def get_by_id(cls, id_) -> 'User':
@@ -139,7 +149,36 @@ class File(db.Model):
     def __repr__(self):
         return '<File %r>' % self.id
 
-    def is_used(self, note):
+    def is_used_in_note(self, note):
         if not self.notes:
             return False
         return note in self.notes
+
+    def is_used_in_conspect(self, conspect):
+        if not self.conspects:
+            return False
+        return conspect in self.conspects
+
+
+class Conspect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, default='Not_name')
+    files = db.relationship('File',
+                            secondary='conspect_file',
+                            lazy='subquery',
+                            backref=db.backref('conspects',
+                                               lazy=True))
+    add_date = db.Column(db.DateTime(), default=datetime.utcnow)
+    public = db.Column(db.String(8), default=None)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '<Conspect %r>' % self.id
+
+    @classmethod
+    def get_by_id(cls, id_) -> 'Conspect':
+        """
+        Кастомный метод запроса объекта модели по id.
+        Model.get_by_id(id)
+        """
+        return cls.query.session.get(cls, id_)
