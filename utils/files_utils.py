@@ -38,9 +38,9 @@ def get_file(filename: str) -> Optional[File]:
     """
     if filename != '' and allowed_file(filename):
         # filename = secure_filename(filename)
-        original_filename = "Docker5 /боевая развертка + CI-CD.md"
-        processed_filename = secure_filename(original_filename)
-        print(processed_filename)  # Выведет: "Конспекты.md"
+        # original_filename = "Docker5 /боевая развертка + CI-CD.md"
+        filename = secure_filename(filename)
+        # print(processed_filename)  # Выведет: "Конспекты.md"
         existing_file = File.query.filter(File.name == filename).first()
         file = existing_file if existing_file else File(
             name=filename,

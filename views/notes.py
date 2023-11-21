@@ -52,7 +52,8 @@ def note(id):
     if not note:
         return redirect(url_for('notes'))
     if not note:
-        return 'Заметка не найдена'
+        flash('Заметка не найдена', 'danger')
+        return redirect(url_for('notes'))
     return render_template('note.html', note=note)
 
 
@@ -63,17 +64,19 @@ def delete_note(id):
     try:
         db.session.delete(note)
         db.session.commit()
+        flash('Заметка удалена', 'success')
         return redirect('/notes', code=302)
     except Exception:
-        return 'При удалении заметки произошла ошибка'
-
+        flash('При удалении заметки произошла ошибка', 'danger')
+        return redirect(url_for('notes'), code=302)
 
 @app.route('/notes/<int:id>/confirmation')
 @login_required
 def confirmation(id):
     note = Note.get_by_id(id)
     if not note:
-        return 'Заметка не найдена'
+        flash('Заметка не найдена', 'danger')
+        return redirect(url_for('notes'))
     return render_template('confirmation.html', note=note)
 
 
@@ -87,9 +90,10 @@ def favorite(id):
     user.favorite_notes.append(note)
     try:
         db.session.commit()
-        return redirect('/notes/' + str(id), code=302)
+        return redirect(url_for('note', id=note.id), code=302)
     except Exception:
-        return 'При добавлении заметки произошла ошибка'
+        flash('При добавлении заметки в избранное произошла ошибка', 'danger')
+        return redirect(url_for('notes'), code=302)
 
 
 @app.route('/notes/<int:id>/unfavorite')
@@ -98,18 +102,23 @@ def unfavorite(id):
     note = Note.get_by_id(id)
     user = current_user
     if not note or not user:
-        return 'Заметка или пользователь не найдены'
+        flash('Заметка или пользователь не найдены', 'danger')
+        return redirect(url_for('notes'))
     if note not in user.favorite_notes:
-        return 'Заметка в избранном пользователя не найдена'
+        flash('Заметка уже не в избранном', 'danger')
+        return redirect(url_for('note', id=note.id), code=302)
     user.favorite_notes.remove(note)
     try:
         db.session.commit()
         if user.is_author(note):
-            return redirect('/notes/' + str(id), code=302)
+            flash('Заметка удалена из избранного', 'success')
+            return redirect(url_for('note', id=note.id), code=302)
         else:
-            return redirect('/notes/public', code=302)
+            flash('Заметка удалена из избранного', 'success')
+            return redirect(url_for('note', id=note.id), code=302)
     except Exception:
-        return 'При удалении заметки произошла ошибка'
+        flash('При удалении заметки из избранного произошла ошибка', 'danger')
+        return redirect(url_for('notes'), code=302)
 
 
 @app.route('/notes/<int:note_id>/edit', methods=['POST', 'GET'])
@@ -117,23 +126,25 @@ def unfavorite(id):
 def edit_note(note_id):
     note = Note.get_by_id(note_id)
     if not current_user.is_author(note):
+        flash('Вы не можете редактировать чужую заметку', 'danger')
         return redirect(url_for('notes'))
     endpoint = request.endpoint
-    print(endpoint)
     if request.method == 'POST':
         note.title = request.form.get('title')
         note.intro = request.form.get('intro')
         note.text = request.form.get('text')
         note.public = request.form.get('public')
-        # note.files.clear()
         note = add_at_note_and_save_files(request.files.getlist('files'), note)
         try:
             db.session.commit()
-            return redirect(url_for('note', id=note.id), code=302)
+            flash('Заметка обновлена', 'success')
+            return redirect(url_for('notes'), code=302)
         except Exception as e:
-            return f'При обновлении заметки произошла ошибка {e}'
+            flash(f'При обновлении заметки произошла ошибка {e}', 'danger')
+            return redirect(url_for('note', id=note.id), code=302)
     if not note:
-        return 'Заметка не найдена'
+        flash('Заметка не найдена', 'danger')
+        return redirect(url_for('notes'))
     files = File.query.filter(File.notes.contains(note)).all()
     return render_template(
         'create_note.html', note=note, endpoint=endpoint, files=files
@@ -157,14 +168,19 @@ def favorites():
 @app.route('/remove_files/<int:note_id>')
 def remove_files(note_id):
     note = Note.get_by_id(note_id)
+    if not current_user.is_author(note):
+        flash('Вы не можете удалять файлы из чужой заметки', 'danger')
+        return redirect(url_for('note', id=note_id))
     if not note:
-        return 'Заметка не найдена'
+        flash('Заметка не найдена', 'danger')
+        return redirect(url_for('notes'))
     note.files = []  # дописать очистку памяти хранилища
     try:
         db.session.commit()
         return redirect(url_for('edit_note', note_id=note_id), code=302)
     except Exception as e:
-        return f'При обновлении заметки произошла ошибка {e}'
+        flash(f'При удалении файла из заметки произошла ошибка {e}', 'danger')
+        return redirect(url_for('note', id=note_id), code=302)
 
 
 @app.route('/notes/public')

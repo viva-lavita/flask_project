@@ -16,11 +16,7 @@
           <div class="col-1">
             <input type=submit value=Upload class="btn btn-success  mb-3 mt-5">
           </div>
-          {% for category, message in  get_flashed_messages(with_categories=true) %}
-            <div class="alert alert-{{ category }}" role="alert">
-                {{ message }}
-            </div>
-          {% endfor %}
+          {% include 'includes/flash.html' %}
         </div>
       </div>
       </form>

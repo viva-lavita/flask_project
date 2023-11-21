@@ -53,6 +53,16 @@ conspect_file = db.Table(
     )
 )
 
+favorites_conspect = db.Table(
+    'favorites_conspect',
+    db.Column(
+        'conspect_id', db.Integer, db.ForeignKey('conspect.id'), primary_key=True
+    ),
+    db.Column(
+        'user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True
+    )
+)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -66,7 +76,10 @@ class User(db.Model, UserMixin):
     )
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    notes = db.relationship('Note', backref='author', lazy='dynamic')
+    notes = db.relationship('Note',
+                            backref='author',
+                            lazy='dynamic',
+                            cascade='all, delete')
     # roles = db.relationship('Role', secondary=roles_users,
     #                         backref=db.backref('users', lazy='dynamic'))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
@@ -74,6 +87,11 @@ class User(db.Model, UserMixin):
         db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow
     )
     is_active = db.Column(db.Boolean(), default=True)
+    conspects = db.relationship('Conspect',
+                                backref='author',
+                                lazy='dynamic',
+                                cascade='all, delete'
+    )
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -91,6 +109,12 @@ class User(db.Model, UserMixin):
         if not self.favorite_notes:
             return False
         return note in self.favorite_notes
+    
+    def is_favorite_conspect(self, conspect):
+        """ Проверка конспекта на избранное """
+        if not self.favorite_conspects:
+            return False
+        return conspect in self.favorite_conspects
 
     def is_author(self, instance):
         """ Проверка на авторство. """
@@ -154,10 +178,10 @@ class File(db.Model):
             return False
         return note in self.notes
 
-    def is_used_in_conspect(self, conspect):
+    def is_used_in_conspect(self):
         if not self.conspects:
             return False
-        return conspect in self.conspects
+        return self.conspects
 
 
 class Conspect(db.Model):
@@ -168,9 +192,15 @@ class Conspect(db.Model):
                             lazy='subquery',
                             backref=db.backref('conspects',
                                                lazy=True))
-    add_date = db.Column(db.DateTime(), default=datetime.utcnow)
+    add_date = db.Column(db.Date(), default=datetime.utcnow)
     public = db.Column(db.String(8), default=None)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    intro = db.Column(db.String(200), nullable=False, default=' ')
+    favorites = db.relationship('User',
+                                secondary='favorites_conspect',
+                                backref=db.backref('favorite_conspects',
+                                                   lazy=True),
+                                lazy='subquery')
 
     def __repr__(self):
         return '<Conspect %r>' % self.id

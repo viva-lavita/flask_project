@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if endpoint == 'add_intro' %}
+Добавить вступление
+{% else %}
+{{ conspect.intro }}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% include 'includes/flash.html' %}
+  <div class="container mt-5 col-lg-7">
+    {% if endpoint == 'add_intro' %}
+    <h1 style="text-align: center; word-wrap: break-word;">Добавь описание конспекта</h1>
+    {% else %}
+    <h1 style="text-align: center; word-wrap: break-word;">Конспект {{ conspect.name }}</h1>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-control-wrapper">
+        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 100px;" maxlength="200">{% if endpoint == 'add_intro' %} {% else %}{{ conspect.intro }}{% endif %}</textarea>
+        <span class="character-counter" id="introCounter"></span>
+      </div><br>
+        <div class="row">
+          <div class="col-9 mt-2">
+            <input type="submit" value="Сохранить" class="btn btn-success">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <script src="{{ url_for('static', filename='js/create-counter.js')}}"></script>
+{% endblock %}
