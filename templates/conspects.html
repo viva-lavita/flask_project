@@ -6,7 +6,7 @@
 
 {% block content %}
 {% include 'includes/flash.html' %}
-{% if endpoint == 'public' or current_user.is_authenticated %}
+{% if request.endpoint == 'public' or current_user.is_authenticated %}
 <div class="container mt-5">
   <div class="row justify-content-md-center">
     {% if conspects|length > 0 %}
@@ -15,9 +15,9 @@
     <div class="col-sm-4 align-self-center">
         <h1 style="text-align: center;">Все конспекты</h1>
     {% else %}
-      {% if endpoint == 'public' %}
+      {% if request.endpoint == 'public' %}
         <h1 style="text-align: center;">Публичные конспекты отсутствуют</h1>
-      {% elif endpoint == 'favorites' %}
+      {% elif request.endpoint == 'favorite_conspects' %}
         <h1 style="text-align: center;">У вас нет избранных конспектов</h1>
       {% else %}
         <h1 style="text-align: center;">Вы пока не написали ни одного конспекта</h1>
@@ -66,5 +66,5 @@
   </div>
   {% endif %}
 
-<script src="{{ url_for('static', filename='js/filter-notes.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/filter-conspect.js')}}"></script>
 {% endblock %}

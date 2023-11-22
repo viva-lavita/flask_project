@@ -124,3 +124,52 @@ def delete_all():
         file_path = os.path.join(folder_path, filename)
         os.remove(file_path)
     return redirect(url_for('upload_conspects'))
+
+
+@app.route('/conspects/<int:id>/favorite')
+@login_required
+def favorite_conspect(id):
+    conspect = Conspect.get_by_id(id)
+    if not conspect:
+        return f'Конспект {id} не найден'
+    current_user.favorite_conspects.append(conspect)
+    try:
+        db.session.commit()
+        flash('Конспект добавлен в избранное', 'success')
+        return redirect(url_for('conspects'), code=302)
+    except Exception:
+        flash('При добавлении конспекта в избранное произошла ошибка', 'danger')
+        return redirect(url_for('conspect', id=id), code=302)
+
+
+@app.route('/conspects/<int:id>/unfavorite')
+@login_required
+def unfavorite_conspect(id):
+    conspect = Conspect.get_by_id(id)
+    if not conspect:
+        return f'Конспект {id} не найден'
+    current_user.favorite_conspects.remove(conspect)
+    try:
+        db.session.commit()
+        flash('Конспект удален из избранного', 'success')
+        return redirect(url_for('conspect', id=id), code=302)
+    except Exception:
+        flash('При удалении конспекта из избранного произошла ошибка', 'danger')
+        return redirect(url_for('conspects'), code=302)
+
+
+@app.route('/conspects/favorites')
+@login_required
+def favorite_conspects():
+    notes = (
+        Conspect.query.filter(Conspect.favorites.contains(current_user))
+                      .order_by(Conspect.id.desc())
+                      .all()
+    )
+    return render_template('conspects.html', notes=notes)
+
+
+@app.route('/conspects/public')
+def public_conspects():
+    conspects = Conspect.get_public_conspects()
+    return render_template('public_conspects.html', conspects=conspects)

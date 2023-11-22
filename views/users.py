@@ -43,6 +43,7 @@ def login():
             flash('Неправильное имя пользователя или пароль', 'danger')
             return render_template('login.html', endpoint=endpoint)
     if current_user.is_authenticated:
+        flash('Добро пожаловать! Вам тут всегда рады =)', 'success')
         return redirect(url_for('notes'))
     return render_template('login.html', endpoint=endpoint)
 
@@ -51,7 +52,8 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return render_template('logout.html')
+    flash('Вы вышли из аккаунта. Ждем Вас вновь!', 'success')
+    return render_template('index.html')
 
 
 @app.route('/register', methods=['POST', 'GET'])

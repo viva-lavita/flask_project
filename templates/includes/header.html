@@ -24,7 +24,7 @@
                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
                   <a class="dropdown-item" href="{{ url_for('upload_conspects') }}">Загрузить конспект</a>
                   <a class="dropdown-item" href="{{ url_for('conspects') }}">Все конспекты</a>
-                  <!-- <a class="dropdown-item" href="{{ url_for('favorites') }}">Избранные</a> -->
+                  <a class="dropdown-item" href="{{ url_for('favorite_conspects') }}">Избранные</a>
                   <!-- <a class="dropdown-item" href="{{ url_for('public') }}">Лента конспектов</a> -->
                 </div>
             </div>
@@ -34,6 +34,13 @@
               <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
                   <a class="dropdown-item" href="{{ url_for('public') }}">Публичные заметки</a>
+                </div>
+            </div>
+            <div class="dropdown">
+              <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Конспекты</a>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
+                  <a class="dropdown-item" href="{{ url_for('public_conspects') }}">Публичные конспекты</a>
+                  <a class="dropdown-item" href="{{ url_for('conspects') }}">Все конспекты</a>
                 </div>
             </div>
           {% endif %}

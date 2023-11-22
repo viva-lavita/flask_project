@@ -56,6 +56,8 @@ def add_at_note_and_save_files(files: list, note: Note) -> Note:
     for uploaded_file in files:
         file = get_file(uploaded_file.filename)
         if file:
+            if file.is_used_in_note(note):
+                continue
             note.files.append(file)
             try:
                 uploaded_file.save(app.config.get('UPLOAD_FOLDER') + file.name)
