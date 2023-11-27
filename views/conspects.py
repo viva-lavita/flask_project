@@ -4,22 +4,22 @@ from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
 from config import app, db
-from models import Conspect, File, note_file, favorites, Note, conspect_file
-from utils.files_utils import add_at_conspects_and_save_files
+from models import Conspect, conspect_file, favorites, File, Note, note_file
+from utils.files_utils import (
+    add_at_conspects_and_save_files, add_at_conspects_and_save_images,
+    check_file_exsists, check_md_file, get_md
+)
 
 
 @app.route('/conspects/<int:id>')
 def conspect(id):
     conspect = Conspect.get_by_id(id)
-    name = conspect.name
-    if not name:
+    if not conspect:
         flash('Конспект не найден', 'danger')
         return redirect(url_for('conspects'))
 
-    with open(os.path.join(app.config.get('UPLOAD_FOLDER'),
-                           name), 'r', encoding='utf-8') as f:
-        markdown_text = f.read()
-    html_text = markdown.markdown(markdown_text)
+    html_text = get_md(conspect.name)
+    name = conspect.name.rsplit('.', 1)[0]
     return render_template('conspect.html',
                            markdown=html_text,
                            conspect=conspect,
@@ -63,8 +63,17 @@ def conspects():
 @login_required
 def add_intro(id):
     conspect = Conspect.get_by_id(id)
+    if not current_user.is_author(conspect):
+        flash('У вас нет прав на редактирование этого конспекта', 'danger')
+        return redirect(url_for('conspect', id=id))
     if request.method == 'POST':
         conspect.intro = request.form['intro']
+        conspect.public = request.form.get('public')
+        images = request.files.getlist('images')
+        add_at_conspects_and_save_images(images, id)
+            # if not add_files:
+            #     flash('При добавлении картинок произошла ошибка', 'danger')
+            #     return redirect(request.url)
         db.session.commit()
         return redirect(url_for('conspect', id=id))
     return render_template('add_intro.html', conspect=conspect)
@@ -101,7 +110,8 @@ def delete_conspect(id):
         flash('Конспект удален', 'success')
         if not File.is_used_in_conspect(file):
             os.remove(os.path.join(app.config.get('UPLOAD_FOLDER'), name))
-            flash('окончательно, ни единого экземпляра на сервере не осталось', 'success')
+            flash('окончательно, ни единого экземпляра на сервере не осталось',
+                  'success')
     except Exception as e:
         flash(f'При удалении конспекта произошла ошибка: {e}', 'danger')
         return redirect(url_for('conspects'))
@@ -137,8 +147,9 @@ def favorite_conspect(id):
         db.session.commit()
         flash('Конспект добавлен в избранное', 'success')
         return redirect(url_for('conspects'), code=302)
-    except Exception:
-        flash('При добавлении конспекта в избранное произошла ошибка', 'danger')
+    except Exception as e:
+        flash(f'При добавлении конспекта в избранное произошла ошибка {e}',
+              'danger')
         return redirect(url_for('conspect', id=id), code=302)
 
 
@@ -153,23 +164,53 @@ def unfavorite_conspect(id):
         db.session.commit()
         flash('Конспект удален из избранного', 'success')
         return redirect(url_for('conspect', id=id), code=302)
-    except Exception:
-        flash('При удалении конспекта из избранного произошла ошибка', 'danger')
+    except Exception as e:
+        flash(f'При удалении конспекта из избранного произошла ошибка {e}',
+              'danger')
         return redirect(url_for('conspects'), code=302)
 
 
 @app.route('/conspects/favorites')
 @login_required
 def favorite_conspects():
-    notes = (
+    conspects = (
         Conspect.query.filter(Conspect.favorites.contains(current_user))
                       .order_by(Conspect.id.desc())
                       .all()
     )
-    return render_template('conspects.html', notes=notes)
+    return render_template('conspects.html', conspects=conspects)
 
 
 @app.route('/conspects/public')
 def public_conspects():
     conspects = Conspect.get_public_conspects()
-    return render_template('public_conspects.html', conspects=conspects)
+    return render_template('conspects.html', conspects=conspects)
+
+
+@app.route('/conspects/<int:conspect_id>/remove_images')
+def remove_images(conspect_id):
+    conspect = Conspect.get_by_id(conspect_id)
+    if not current_user.is_author(conspect):
+        flash('Вы не можете удалять фотографии из чужого конспекта', 'danger')
+        return redirect(url_for('conspect', id=conspect_id))
+    if not conspect:
+        flash(f'Конспект c id-{conspect_id} не найден', 'danger')
+        return redirect(url_for('conspects'))
+    files = File.query.filter(File.img_conspects.contains(conspect)).all()
+    try:
+        for file in files:
+            if check_md_file(file.name):
+                continue
+            if check_file_exsists(file.name):
+                conspect.images.remove(file)
+                os.remove(
+                    os.path.join(app.config.get('UPLOAD_FOLDER'),
+                                 file.name)
+                )
+        db.session.commit()
+        return redirect(url_for('add_intro', id=conspect_id), code=302)
+    except Exception as e:
+        flash(f'При удалении файла из заметки произошла ошибка {e}',
+              'danger')
+        return redirect(url_for('conspect', id=conspect_id), code=302)
+

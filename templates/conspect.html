@@ -8,10 +8,19 @@
 {% include 'includes/flash.html' %}
 <div class="container mt-5 col-lg-8">
   <div class="card">
-    <h3  class='mt-4'style="text-align: center; word-wrap: break-word;">Конспект {{ conspect.name }}</h3>
-    {% if conspect.intro|length > 3 %}
+    <h3  class='mt-5'style="text-align: center; word-wrap: break-word;">{{ name }}</h3>
+    <il class="align-self-end">{% include 'includes/btn_conspect.html' %}</il>
+    {% if conspect.images|length > 0 %}
+      {% for file in conspect.images %}
+        
+        <div class="b-example-divider" style="width: 100%;"></div>
+        <img src="{{ url_for('static', filename='media/uploads/' + file.name) }}" class="card-img-top featurette-image img-fluid mx-auto" alt="только картинки=)" style="height: 20%;">
+
+      {% endfor %}
+    {% endif %}
+    {% if conspect.intro|length > 2 %}
     <div class="card-body container">
-      <h5 class="card-title col-8">{{ conspect.intro }}</h5>
+      <i class="card-title text-center">{{ conspect.intro }}</i>
     </div>
     {% endif %}
     <div class="card-body">

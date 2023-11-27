@@ -13,7 +13,7 @@ from models import User
 logger = logging.getLogger('my_logger')
 
 
-@app.route('/admin/') # дописать админку
+@app.route('/admin/')  # написать админку
 @login_required
 def admin():
     return render_template('admin.html')
@@ -21,7 +21,6 @@ def admin():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    endpoint = request.endpoint
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -41,11 +40,11 @@ def login():
             # return redirect(url_for('notes'))
         else:
             flash('Неправильное имя пользователя или пароль', 'danger')
-            return render_template('login.html', endpoint=endpoint)
+            return render_template('login.html')
     if current_user.is_authenticated:
         flash('Добро пожаловать! Вам тут всегда рады =)', 'success')
         return redirect(url_for('notes'))
-    return render_template('login.html', endpoint=endpoint)
+    return render_template('login.html')
 
 
 @app.route('/logout')
@@ -58,7 +57,6 @@ def logout():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    endpoint = request.endpoint
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -82,12 +80,11 @@ def register():
             return redirect(url_for('login'))
     if current_user.is_authenticated:
         return redirect(url_for('notes'))
-    return render_template('login.html', endpoint=endpoint)
+    return render_template('login.html')
 
 
 @app.route('/restoring_access', methods=['POST', 'GET'])
 def restoring_access(): # Явно нужно переписать + убрать текст
-    endpoint = request.endpoint
     if current_user.is_authenticated:
         return redirect(url_for('notes'))
     if request.method == 'POST':
@@ -118,4 +115,4 @@ def restoring_access(): # Явно нужно переписать + убрат�
             return redirect(url_for('restoring_access'))
         flash('Новый пароль отправлен на почту', 'success')
         return redirect(url_for('login'))
-    return render_template('login.html', endpoint=endpoint)
+    return render_template('login.html')

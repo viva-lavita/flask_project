@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Все конспекты
+  {% if request.endpoint == 'public_conspects' %}
+    Публичные конспекты
+  {% else %}
+    Все конспекты
+  {% endif %}
 {% endblock %}
 
 {% block content %}
 {% include 'includes/flash.html' %}
-{% if request.endpoint == 'public' or current_user.is_authenticated %}
+{% if request.endpoint == 'public_conspects' or current_user.is_authenticated %}
 <div class="container mt-5">
   <div class="row justify-content-md-center">
     {% if conspects|length > 0 %}

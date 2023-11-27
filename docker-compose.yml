@@ -3,7 +3,6 @@ version: '3.11.4'
 volumes:
   pg_data:
   static:
-  media:
 
 services:
   db:
@@ -33,7 +32,6 @@ services:
     volumes:
       - .:/app
       - static:/app/static/
-      - media:/app/media/
   redis:
     image: "redis:alpine"
     env_file: .env
@@ -51,4 +49,3 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - static:/etc/nginx/html/static/
-      - media:/etc/nginx/html/media/

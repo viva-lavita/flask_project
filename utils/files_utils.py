@@ -1,13 +1,14 @@
 import os
 import re
 from typing import Optional
+
+import markdown
 from views.notes import app, db
 from models import File, Note, Conspect
 
 
 def allowed_file(filename: str) -> bool:
     """Проверяет, является ли формат файла допустимым."""
-    # print(filename.rsplit('.', 1)[1].lower())
     return ('.' in filename and filename.rsplit('.', 1)[1].lower()
             in app.config.get('ALLOWED_EXTENSIONS'))
 
@@ -37,10 +38,7 @@ def get_file(filename: str) -> Optional[File]:
     Дополнительно проверяет и корректирует имя файла.
     """
     if filename != '' and allowed_file(filename):
-        # filename = secure_filename(filename)
-        # original_filename = "Docker5 /боевая развертка + CI-CD.md"
         filename = secure_filename(filename)
-        # print(processed_filename)  # Выведет: "Конспекты.md"
         existing_file = File.query.filter(File.name == filename).first()
         file = existing_file if existing_file else File(
             name=filename,
@@ -66,6 +64,10 @@ def add_at_note_and_save_files(files: list, note: Note) -> Note:
                 raise Exception(
                     f'При добавлении иллюстрации произошла ошибка: {e}'
                 )
+            if not os.path.isfile(
+                    os.path.join(app.config.get('UPLOAD_FOLDER'), file.name)
+            ):
+                raise Exception('Файл не был загружен')
     return note
 
 
@@ -78,7 +80,6 @@ def add_at_conspects_and_save_files(files: list, user_id: int) -> list:
     conspect_ids = []
     for uploaded_file in files:
         file = get_file(uploaded_file.filename)
-        # print(file.name)
         if file and check_md_file(file.name):
             conspect = create_conspect(file.name, user_id)
             conspect_ids.append(conspect.id)
@@ -103,6 +104,39 @@ def add_at_conspects_and_save_files(files: list, user_id: int) -> list:
     return conspect_ids
 
 
+def add_at_conspects_and_save_images(images: list, conspect_id: int) -> list:
+    """
+    Массовая загрузка картинок в конспект.
+    """
+    conspect_ids = []
+    for uploaded_file in images:
+        if not uploaded_file:
+            continue
+        file = get_file(uploaded_file.filename)
+        if file and not check_md_file(file.name):
+            conspect = Conspect.get_by_id(conspect_id)
+            if conspect:
+                conspect.images.append(file)
+                conspect_ids.append(conspect_id)
+                try:
+                    uploaded_file.save(
+                        app.config.get('UPLOAD_FOLDER') + file.name
+                    )
+                    db.session.add(file)
+                except Exception as e:
+                    raise Exception(
+                        f'При добавлении картинки произошла ошибка: {e}'
+                    )
+    if conspect_ids:
+        try:
+            db.session.commit()
+        except Exception as e:
+            raise Exception(
+                f'При добавлении одной из картинок произошла ошибка: {e}'
+            )
+    return conspect_ids
+
+
 def create_conspect(filename, user_id):
     """Создает конспект"""
     conspect = Conspect(name=filename,
@@ -120,3 +154,45 @@ def create_conspect(filename, user_id):
 def check_md_file(filename):
     if filename.rsplit('.', 1)[1].lower() == 'md':
         return True
+
+
+
+from markdown.extensions import Extension
+from markdown.preprocessors import Preprocessor
+
+
+# class CodeBlockExtension(Extension):
+#     def extendMarkdown(self, md):
+#         md.preprocessors.register(CodeBlockPreprocessor(md), 'code_block', 25)
+
+
+# class CodeBlockPreprocessor(Preprocessor):
+#     def run(self, lines):
+#         new_lines = []
+#         in_code_block = False
+
+#         for line in lines:
+#             if line.strip() == '```':
+#                 if in_code_block:
+#                     in_code_block = False
+#                     new_lines.append('</pre>')
+#                 else:
+#                     in_code_block = True
+#                     new_lines.append('<pre><code>')
+#             else:
+#                 new_lines.append(line)
+
+#         return new_lines
+
+def get_md(filename):
+    """ Возвращает содержимое Markdown-файла. """
+    if check_md_file(filename):
+        with open(os.path.join(app.config.get('UPLOAD_FOLDER'),
+                               filename), 'r', encoding='utf-8') as f:
+            markdown_text = f.read()
+        return markdown.markdown(markdown_text) # , extensions=['CodeBlockExtension'])
+
+
+def check_file_exsists(filename):
+    return os.path.isfile(os.path.join(app.config.get('UPLOAD_FOLDER'),
+                                       filename))

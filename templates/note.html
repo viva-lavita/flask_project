@@ -20,7 +20,7 @@
     {% if note.files|length > 0 %}
       {% for file in note.files %}
         <div class="b-example-divider" style="width: 100%;"></div>
-        <img src="{{ url_for('static', filename='media/uploads/' + file.name) }}" class="card-img-top featurette-image img-fluid mx-auto" alt="..." style="height: 20%;">
+        <img src="{{ url_for('static', filename='media/uploads/' + file.name) }}" class="card-img-top featurette-image img-fluid mx-auto" alt="только картинки=)" style="height: 20%;">
       {% endfor %}
     {% endif %}
     <div class="card-body">

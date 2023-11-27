@@ -9,15 +9,14 @@ from utils.files_utils import add_at_note_and_save_files
 
 @app.route('/notes')
 def notes():
-    endpoint = request.endpoint
     if current_user.is_authenticated:
         notes = (Note.query
                      .filter(Note.user_id == current_user.id)
                      .order_by(Note.id.desc())
                      .all())
-        return render_template('notes.html', notes=notes, endpoint=endpoint)
+        return render_template('notes.html', notes=notes)
     else:
-        return render_template('notes.html', endpoint=endpoint)
+        return render_template('notes.html')
 
 
 @app.route('/create_note', methods=['GET', 'POST'])
@@ -44,8 +43,7 @@ def create_note():
         flash('Заметка добавлена', 'success')
         return redirect(url_for('note', id=note.id))
     else:
-        endpoint = request.endpoint
-        return render_template('create_note.html', endpoint=endpoint)
+        return render_template('create_note.html')
 
 
 @app.route('/notes/<int:id>')
@@ -133,7 +131,6 @@ def edit_note(note_id):
     if not current_user.is_author(note):
         flash('Вы не можете редактировать чужую заметку', 'danger')
         return redirect(url_for('notes'))
-    endpoint = request.endpoint
     if request.method == 'POST':
         note.title = request.form.get('title')
         note.intro = request.form.get('intro')
@@ -152,7 +149,7 @@ def edit_note(note_id):
         return redirect(url_for('notes'))
     files = File.query.filter(File.notes.contains(note)).all()
     return render_template(
-        'create_note.html', note=note, endpoint=endpoint, files=files
+        'create_note.html', note=note, files=files
     )
 
 
@@ -198,6 +195,5 @@ def remove_files(note_id):
 
 @app.route('/notes/public')
 def public():
-    endpoint = request.endpoint
     notes = Note.query.filter_by(public='on').order_by(Note.id.desc()).all()
-    return render_template('notes.html', notes=notes, endpoint=endpoint)
+    return render_template('notes.html', notes=notes)

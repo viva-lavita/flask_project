@@ -91,7 +91,7 @@ class User(db.Model, UserMixin):
                                 backref='author',
                                 lazy='dynamic',
                                 cascade='all, delete'
-    )
+                                )
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -109,7 +109,7 @@ class User(db.Model, UserMixin):
         if not self.favorite_notes:
             return False
         return note in self.favorite_notes
-    
+
     def is_favorite_conspect(self, conspect):
         """ Проверка конспекта на избранное """
         if not self.favorite_conspects:
@@ -201,6 +201,11 @@ class Conspect(db.Model):
                                 backref=db.backref('favorite_conspects',
                                                    lazy=True),
                                 lazy='subquery')
+    images = db.relationship('File',
+                             secondary='conspect_image',
+                             lazy='subquery',
+                             backref=db.backref('img_conspects',
+                                                lazy=True))
 
     def __repr__(self):
         return '<Conspect %r>' % self.id
@@ -212,3 +217,20 @@ class Conspect(db.Model):
         Model.get_by_id(id)
         """
         return cls.query.session.get(cls, id_)
+
+    @classmethod
+    def get_public_conspects(cls):
+        return (cls.query.filter_by(public='on')
+                         .order_by(cls.id.desc())
+                         .all())
+
+
+conspect_image = db.Table(
+    'conspect_image',
+    db.Column(
+        'conspect_id', db.Integer, db.ForeignKey('conspect.id')
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id')
+    )
+)
