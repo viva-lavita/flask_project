@@ -6,16 +6,18 @@
 
 {% block content %}
     <div class="container mt-5 col-lg-7 card">
-      <h1>Загрузи новый файл</h1>
+      <h1>Загрузи конспекты (только .md)</h1>
+      <p class="card-text">Загрузите один, либо сразу несколько конспектов в формате markdown. Перенесите сюда свои заметки из Obsidian, это будет Ваше резервное хранилище. Файлы можно будет отсюда скачать в любой момент.</p>
       <form method="post" enctype="multipart/form-data">
         <div class="row">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="col-4">
-            <input type=file name=file class="form-control mb-3 mt-5">
+            <input type=file name=files class="form-control mb-3 mt-5" multiple="multiple">
           </div>
           <div class="col-1">
             <input type=submit value=Upload class="btn btn-success  mb-3 mt-5">
           </div>
+          {% include 'includes/flash.html' %}
         </div>
       </div>
       </form>

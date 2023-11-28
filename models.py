@@ -43,6 +43,26 @@ note_file = db.Table(
     )
 )
 
+conspect_file = db.Table(
+    'conspect_file',
+    db.Column(
+        'conspect_id', db.Integer, db.ForeignKey('conspect.id'), primary_key=True
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id'), primary_key=True
+    )
+)
+
+favorites_conspect = db.Table(
+    'favorites_conspect',
+    db.Column(
+        'conspect_id', db.Integer, db.ForeignKey('conspect.id'), primary_key=True
+    ),
+    db.Column(
+        'user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True
+    )
+)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -56,7 +76,10 @@ class User(db.Model, UserMixin):
     )
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    notes = db.relationship('Note', backref='author', lazy='dynamic')
+    notes = db.relationship('Note',
+                            backref='author',
+                            lazy='dynamic',
+                            cascade='all, delete')
     # roles = db.relationship('Role', secondary=roles_users,
     #                         backref=db.backref('users', lazy='dynamic'))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
@@ -64,6 +87,11 @@ class User(db.Model, UserMixin):
         db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow
     )
     is_active = db.Column(db.Boolean(), default=True)
+    conspects = db.relationship('Conspect',
+                                backref='author',
+                                lazy='dynamic',
+                                cascade='all, delete'
+                                )
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -82,9 +110,15 @@ class User(db.Model, UserMixin):
             return False
         return note in self.favorite_notes
 
-    def is_author(self, note):
-        """ Проверка заметки на автора """
-        return self.id == note.user_id
+    def is_favorite_conspect(self, conspect):
+        """ Проверка конспекта на избранное """
+        if not self.favorite_conspects:
+            return False
+        return conspect in self.favorite_conspects
+
+    def is_author(self, instance):
+        """ Проверка на авторство. """
+        return self.id == instance.user_id
 
     @classmethod
     def get_by_id(cls, id_) -> 'User':
@@ -139,7 +173,64 @@ class File(db.Model):
     def __repr__(self):
         return '<File %r>' % self.id
 
-    def is_used(self, note):
+    def is_used_in_note(self, note):
         if not self.notes:
             return False
         return note in self.notes
+
+    def is_used_in_conspect(self):
+        if not self.conspects:
+            return False
+        return self.conspects
+
+
+class Conspect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, default='Not_name')
+    files = db.relationship('File',
+                            secondary='conspect_file',
+                            lazy='subquery',
+                            backref=db.backref('conspects',
+                                               lazy=True))
+    add_date = db.Column(db.Date(), default=datetime.utcnow)
+    public = db.Column(db.String(8), default=None)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    intro = db.Column(db.String(200), nullable=False, default=' ')
+    favorites = db.relationship('User',
+                                secondary='favorites_conspect',
+                                backref=db.backref('favorite_conspects',
+                                                   lazy=True),
+                                lazy='subquery')
+    images = db.relationship('File',
+                             secondary='conspect_image',
+                             lazy='subquery',
+                             backref=db.backref('img_conspects',
+                                                lazy=True))
+
+    def __repr__(self):
+        return '<Conspect %r>' % self.id
+
+    @classmethod
+    def get_by_id(cls, id_) -> 'Conspect':
+        """
+        Кастомный метод запроса объекта модели по id.
+        Model.get_by_id(id)
+        """
+        return cls.query.session.get(cls, id_)
+
+    @classmethod
+    def get_public_conspects(cls):
+        return (cls.query.filter_by(public='on')
+                         .order_by(cls.id.desc())
+                         .all())
+
+
+conspect_image = db.Table(
+    'conspect_image',
+    db.Column(
+        'conspect_id', db.Integer, db.ForeignKey('conspect.id')
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id')
+    )
+)

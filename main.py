@@ -1,3 +1,4 @@
+import sys
 from config import app, db
 from views.app import *
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     with app.app_context():
         try:
             db.create_all()
-            print('База данных создана')
+            sys.stdout.write('База данных обновлена')
         except Exception as e:
-            print(f'Ошибка создания БД: + {e}')
+            sys.stdout.write(f'Ошибка создания БД: + {e}')
     app.run(host='0.0.0.0', port=5000)

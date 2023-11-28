@@ -1,30 +1,34 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Все заметки
+  {% if request.endpoint == 'public_conspects' %}
+    Публичные конспекты
+  {% else %}
+    Все конспекты
+  {% endif %}
 {% endblock %}
 
 {% block content %}
 {% include 'includes/flash.html' %}
-{% if request.endpoint == 'public' or current_user.is_authenticated %}
+{% if request.endpoint == 'public_conspects' or current_user.is_authenticated %}
 <div class="container mt-5">
   <div class="row justify-content-md-center">
-    {% if notes|length > 0 %}
+    {% if conspects|length > 0 %}
     <div class="col-sm-4 col-lg-2">
     </div>
     <div class="col-sm-4 align-self-center">
-        <h1 style="text-align: center;">Все заметки</h1>
+        <h1 style="text-align: center;">Все конспекты</h1>
     {% else %}
       {% if request.endpoint == 'public' %}
-        <h1 style="text-align: center;">Публичные заметки отсутствуют</h1>
-      {% elif request.endpoint == 'favorites' %}
-        <h1 style="text-align: center;">У вас нет избранных заметок</h1>
+        <h1 style="text-align: center;">Публичные конспекты отсутствуют</h1>
+      {% elif request.endpoint == 'favorite_conspects' %}
+        <h1 style="text-align: center;">У вас нет избранных конспектов</h1>
       {% else %}
-        <h1 style="text-align: center;">Вы пока не написали ни одной заметки</h1>
+        <h1 style="text-align: center;">Вы пока не написали ни одного конспекта</h1>
       {% endif %}
     {% endif %}
     </div>
-    {% if notes|length > 0 %}
+    {% if conspects|length > 0 %}
       <div class="col-sm-4 col-lg-2 mb-2">
         <div class="input-group">
           <span class="input-group-text" id="basic-addon1">
@@ -37,29 +41,22 @@
       </div>
     </div>
     {% endif %}
-    {% if notes|length > 0 %}
-      {% for note in notes %}
+    {% if conspects|length > 0 %}
+      {% for conspect in conspects %}
         <div class="card container col-lg-8 p-0">
           <div class="card-body container">
-            <h5 class="card-title col-7">{{ note.title }}</h5>
-            <il class="col">{% include 'includes/btn.html' %}</il>
+            <h5 class="card-title col-7">{{ conspect.name }}</h5>
+            <il class="align-self-end">{% include 'includes/btn_conspect.html' %}</il>
           </div>
           <div class="card-body container">
-            <p class="card-text">{{ note.intro }}</p>
-            <p class="card-author"><b>Автор: {{ note.author.username }}</b></p>
-            <a href="/notes/{{ note.id }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
+            {% if conspect.intro|length > 3 %}
+            <p class="card-text">{{ conspect.intro }}</p>
+            {% endif %}
+            <p class="card-author"><b>Автор: {{ conspect.author.username }}</b></p>
+            <a href="{{ url_for('conspect', id=conspect.id) }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
                 Подробнее
             </a>
-            <note class="date col">Cоздан: {{ note.data }}</note>
-            <!-- <p class="card-text">
-              {% if note.files|length > 4 %}
-                {{ note.files|length }} файлов
-              {% elif note.files|length > 1 %}
-                {{ note.files|length }} файлa
-              {% else %}
-                {{ note.files|length }} файл
-              {% endif %}
-            </p> -->
+            <note class="date col">Загружен: {{ conspect.add_date }}</note>
           </div>
           <div class="b-example-divider" style="width: 100%;"></div>
         </div>
@@ -73,5 +70,5 @@
   </div>
   {% endif %}
 
-<script src="{{ url_for('static', filename='js/filter-notes.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/filter-conspect.js')}}"></script>
 {% endblock %}

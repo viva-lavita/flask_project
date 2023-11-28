@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{% if endpoint == 'create_note' %}
+{% if request.endpoint == 'create_note' %}
 Создай новую заметку
 {% else %}
 {{ note.title }}
@@ -9,8 +9,9 @@
 {% endblock %}
 
 {% block content %}
+{% include 'includes/flash.html' %}
   <div class="container mt-5 col-lg-7">
-    {% if endpoint == 'create_note' %}
+    {% if request.endpoint == 'create_note' %}
     <h1 style="text-align: center; word-wrap: break-word;">Создай новую заметку</h1>
     {% else %}
     <h1 style="text-align: center; word-wrap: break-word;">{{ note.title }}</h1>
@@ -18,31 +19,43 @@
     <form method="post" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <div class="form-control-wrapper">
-        <input type="title" name="title" id="title" placeholder="Заголовок" class="form-control" {% if endpoint == "create_note" %} {% else %} value="{{ note.title }}" {% endif %} maxlength="100" required>
+        <input type="title" name="title" id="title" placeholder="Заголовок" class="form-control" {% if request.endpoint == "create_note" %} {% else %} value="{{ note.title }}" {% endif %} maxlength="100" required>
         <span class="character-counter" id="titleCounter"></span>
       </div><br>
       <div class="form-control-wrapper">
-        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 100px;" maxlength="200">{% if endpoint == 'create_note' %} {% else %}{{ note.intro }}{% endif %}</textarea>
+        <textarea name="intro" id="intro" placeholder="Ключевое знание" class="form-control" style="height: 100px;" maxlength="200">{% if request.endpoint == 'create_note' %} {% else %}{{ note.intro }}{% endif %}</textarea>
         <span class="character-counter" id="introCounter"></span>
       </div><br>
       <div class="form-control-wrapper">
-        <textarea name="text" id="text" placeholder="Текст заметки" class="form-control" style="height: 300px;" maxlength="10000">{% if endpoint == 'create_note' %} {% else %}{{ note.text }}{% endif %}</textarea>
+        <textarea name="text" id="text" placeholder="Текст заметки" class="form-control" style="height: 300px;" maxlength="10000">{% if request.endpoint == 'create_note' %} {% else %}{{ note.text }}{% endif %}</textarea>
         <span class="character-counter" id="textCounter"></span>
       </div><br>
-      <div class="container mt-5">
+      <div class="container-fluid">
         <div class="row">
-          <div class="col"></div>
           <div class='col'>
             <input type=file name=files class="form-control" multiple="multiple">
+          </div>
+          {% if request.endpoint != 'create_note' %}
+          <div class="col">
+            <a href="{{ url_for('remove_files' , note_id=note.id) }}" class="btn btn-outline-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-image" viewBox="0 0 16 16">
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path>
+                <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"></path>
+              </svg>
+                Удалить
+            </a>
+          </div>
+          {% endif %}
+        </div>
+        <div class="row">
+          <div class="col form-check form-switch mb-3 mt-4" style="margin-left: 14px;">
+            <input class="form-check-input" type="checkbox" name="public" id="flexSwitchCheckDefault" {% if request.endpoint == 'edit_note' and note.public == 'on' %} checked {% endif %}>
+            <label class="form-check-label" for="flexSwitchCheckDefault">Public</label>
           </div>
         </div>
         <div class="row">
           <div class="col-9 mt-2">
             <input type="submit" value="Сохранить" class="btn btn-success">
-          </div>
-          <div class="col-3 form-check form-switch mb-3 mt-2 pl-5">
-            <input class="form-check-input" type="checkbox" name="public" id="flexSwitchCheckDefault" {% if endpoint == 'edit' and note.public == 'on' %} checked {% endif %}>
-            <label class="form-check-label" for="flexSwitchCheckDefault">Public</label>
           </div>
         </div>
       </div>

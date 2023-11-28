@@ -7,8 +7,9 @@ filterInput.addEventListener('input', function () {
   cards.forEach(function (card) {
     const title = card.querySelector('.card-title').innerText.toLowerCase();
     const intro = card.querySelector('.card-text').innerText.toLowerCase();
+    const author = card.querySelector('.card-author').innerText.toLowerCase();
 
-    if (title.includes(filterValue) || intro.includes(filterValue)) {
+    if (title.includes(filterValue) || intro.includes(filterValue) || author.includes(filterValue)) {
       card.style.display = 'block';
     } else {
       card.style.display = 'none';

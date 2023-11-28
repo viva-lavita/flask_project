@@ -7,22 +7,40 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
-          <li class="nav-item">
           {% if current_user.is_authenticated %}
-          <div class="dropdown">
-            <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
-              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
-                <a class="dropdown-item" href="{{ url_for('notes') }}">Все заметки</a>
-                <a class="dropdown-item" href="{{ url_for('favorites') }}">Избранные</a>
-                <a class="dropdown-item" href="{{ url_for('public') }}">Публичные заметки</a>
-              </div>
-          </div>
+          <li class="nav-item">
+            <div class="dropdown">
+              <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
+                  <a class="dropdown-item" href="{{ url_for('notes') }}">Все заметки</a>
+                  <a class="dropdown-item" href="{{ url_for('favorites') }}">Избранные</a>
+                  <a class="dropdown-item" href="{{ url_for('public') }}">Лента заметок</a>
+                </div>
+            </div>
+          </li>
+          <li class="nav-item">
+            <div class="dropdown">
+              <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Конспекты</a>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
+                  <a class="dropdown-item" href="{{ url_for('upload_conspects') }}">Загрузить конспект</a>
+                  <a class="dropdown-item" href="{{ url_for('conspects') }}">Все конспекты</a>
+                  <a class="dropdown-item" href="{{ url_for('favorite_conspects') }}">Избранные</a>
+                  <a class="dropdown-item" href="{{ url_for('public_conspects') }}">Лента конспектов</a>
+                </div>
+            </div>
           </li>
           {% else %}
             <div class="dropdown">
               <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
                   <a class="dropdown-item" href="{{ url_for('public') }}">Публичные заметки</a>
+                </div>
+            </div>
+            <div class="dropdown">
+              <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Конспекты</a>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton5" data-popper-placement="bottom-end">
+                  <a class="dropdown-item" href="{{ url_for('public_conspects') }}">Публичные конспекты</a>
+                  <a class="dropdown-item" href="{{ url_for('conspects') }}">Все конспекты</a>
                 </div>
             </div>
           {% endif %}
@@ -32,7 +50,7 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('telegram') }}">Телега</a>
           <li class="nav-item">
-          {% if endpoint != 'about' %}
+          {% if request.endpoint != 'about' %}
             <a class="nav-link" href="{{ url_for('about') }}">О сайте</a>
           </li>
           {% endif %}
@@ -41,9 +59,9 @@
           </li>
         </ul>
         {% if current_user.is_authenticated %}
-          <a href="/create_note" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Новая заметка</a>
+          <a href="{{ url_for('create_note') }}" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Новая заметка</a>
         {% else %}
-          <a href="/login" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Вход</a>
+          <a href="{{ url_for('login') }}" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Вход</a>
         {% endif %}
         <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
