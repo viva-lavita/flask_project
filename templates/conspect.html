@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block styles %}
+  <link href="{{ url_for('static', filename='css/md_styles.css')}}" rel="stylesheet">
+{% endblock %}
+
 {% block title %}
   Загрузка файла
 {% endblock %}

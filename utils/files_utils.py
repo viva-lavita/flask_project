@@ -3,6 +3,7 @@ import re
 from typing import Optional
 
 import markdown
+
 from views.notes import app, db
 from models import File, Note, Conspect
 
@@ -156,33 +157,10 @@ def check_md_file(filename):
         return True
 
 
+def check_file_exsists(filename):
+    return os.path.isfile(os.path.join(app.config.get('UPLOAD_FOLDER'),
+                                       filename))
 
-from markdown.extensions import Extension
-from markdown.preprocessors import Preprocessor
-
-
-# class CodeBlockExtension(Extension):
-#     def extendMarkdown(self, md):
-#         md.preprocessors.register(CodeBlockPreprocessor(md), 'code_block', 25)
-
-
-# class CodeBlockPreprocessor(Preprocessor):
-#     def run(self, lines):
-#         new_lines = []
-#         in_code_block = False
-
-#         for line in lines:
-#             if line.strip() == '```':
-#                 if in_code_block:
-#                     in_code_block = False
-#                     new_lines.append('</pre>')
-#                 else:
-#                     in_code_block = True
-#                     new_lines.append('<pre><code>')
-#             else:
-#                 new_lines.append(line)
-
-#         return new_lines
 
 def get_md(filename):
     """ Возвращает содержимое Markdown-файла. """
@@ -190,9 +168,9 @@ def get_md(filename):
         with open(os.path.join(app.config.get('UPLOAD_FOLDER'),
                                filename), 'r', encoding='utf-8') as f:
             markdown_text = f.read()
-        return markdown.markdown(markdown_text) # , extensions=['CodeBlockExtension'])
-
-
-def check_file_exsists(filename):
-    return os.path.isfile(os.path.join(app.config.get('UPLOAD_FOLDER'),
-                                       filename))
+        return markdown.markdown(
+            markdown_text,
+            extensions=['fenced_code',
+                        'codehilite',
+                        'footnotes',
+                        'md_in_html'])
