@@ -3,7 +3,9 @@ from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
 from config import app, db
-from models import Conspect, conspect_file, favorites, File, Note, note_file
+from models import (
+    Conspect, conspect_file, favorites, File, Note, note_file, User
+)
 from utils.files_utils import (
     add_at_conspects_and_save_files, add_at_conspect_and_save_images,
     check_file_exsists, check_md_file, get_md
@@ -46,16 +48,14 @@ def upload_conspects():
 
 @app.route('/conspects')
 def conspects():
-    endpoint = request.endpoint
     if current_user.is_authenticated:
         conspects = (Conspect.query
                              .filter(Conspect.user_id == current_user.id)
                              .order_by(Conspect.id.desc())
                              .all())
         return render_template('conspects.html',
-                               endpoint=endpoint,
                                conspects=conspects)
-    return render_template('conspects.html', endpoint=endpoint)
+    return render_template('conspects.html')
 
 
 @app.route('/conspects/<int:id>/add_intro', methods=['GET', 'POST'])
@@ -217,3 +217,19 @@ def remove_images(conspect_id):
         flash(f'При удалении файла из заметки произошла ошибка {e}',
               'danger')
         return redirect(url_for('conspect', id=conspect_id), code=302)
+
+
+@app.route('/user_<int:user_id>/conspects')
+def user_conspects(user_id):
+    if user_id == current_user.id:
+        return redirect(url_for('conspects'))
+    user = User.get_by_id(user_id)
+    if current_user.is_authenticated:
+        conspects = (Conspect.query
+                             .filter(Conspect.user_id == user.id)
+                             .order_by(Conspect.id.desc())
+                             .all())
+        return render_template('conspects.html',
+                               conspects=conspects,
+                               user=user)
+    return render_template('conspects.html')

@@ -1,12 +1,6 @@
-# from flask_admin import create_admin
-# from flask_security import UserMixin, RoleMixin
-# from flask_admin import Admin
-# from flask_security import Security, SQLAlchemyUserDatastore
 from datetime import datetime
 
-from flask_login import UserMixin
-from flask_login import LoginManager, UserMixin
-from flask_roleman import RoleMan, UserModelMixing, GroupModelMixing, RoleModelMixing
+# from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import db, login_manager
@@ -77,6 +71,14 @@ class User(db.Model):
                                 lazy='dynamic',
                                 cascade='all, delete'
                                 )
+    name = db.Column(db.String(100), default='--')
+    surname = db.Column(db.String(100), default='--')
+    birth_date = db.Column(db.Date, default='--')
+    phone = db.Column(db.String(100), default='--')
+    city = db.Column(db.String(200), default='--')
+    profession = db.Column(db.String(100), default='--')
+    site = db.Column(db.String(100), default='--')
+    github = db.Column(db.String(100), default='--')
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -89,11 +91,11 @@ class User(db.Model):
         """ Проверка пароля """
         return check_password_hash(self.password_hash, password)
 
-    def is_favorite(self, note):
-        """ Проверка заметки на избранное """
-        if not self.favorite_notes:
+    def is_favorite(self, note) -> bool:
+        """Проверяет, является ли заметка избранной."""
+        if self.favorite_notes is None:
             return False
-        return note in self.favorite_notes
+        return self.favorite_notes and note in set(self.favorite_notes)
 
     def is_favorite_conspect(self, conspect):
         """ Проверка конспекта на избранное """
@@ -153,12 +155,9 @@ class User(db.Model):
     def get_id(self):
         return self.id
 
-    # @property
-    # def is_admin(self):
-    #     if self.role == 'admin':
-    #         return True
-    #     else:
-    #         return False
+    @property
+    def is_admin(self):
+        return self.has_role('admin')
 
     def __unicode__(self):
         return self.username

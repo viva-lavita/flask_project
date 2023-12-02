@@ -3,13 +3,11 @@ from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
 from config import app, db
-from models import File, Note
+from models import File, Note, User
 from utils.files_utils import add_at_note_and_save_files
-from utils.decorators import roles_required
 
 
 @app.route('/notes')
-@roles_required('admin')
 def notes():
     if current_user.is_authenticated:
         notes = (Note.query
@@ -199,3 +197,19 @@ def remove_files(note_id):
 def public():
     notes = Note.query.filter_by(public='on').order_by(Note.id.desc()).all()
     return render_template('notes.html', notes=notes)
+
+
+@app.route('/user_<int:user_id>/notes')
+def user_notes(user_id):
+    if user_id == current_user.id:
+        return redirect(url_for('notes'))
+    user = User.get_by_id(user_id)
+    if current_user.is_authenticated:
+        notes = (Note.query
+                     .filter(Note.user_id == user.id)
+                     .order_by(Note.id.desc())
+                     .all())
+        return render_template('notes.html',
+                               notes=notes,
+                               user=user)
+    return render_template('notes.html')

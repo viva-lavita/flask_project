@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 
 from config import app, db
@@ -49,6 +50,12 @@ def create_admin():
     user = User(
         username='admin',
         email='pCwfK7@example.com',
+        name='админ',
+        surname='админ',
+        profession='Full Stack Developer',
+        city='Moscow',
+        phone='+7-999-999-99-99',
+        birth_date=datetime(1990, 1, 1)
     )
     user.set_password(password)
     user.groups.append(group)

@@ -1,12 +1,12 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-from .views.views_app import HomeView
+from .views.views_app import DashBordView, HomeView
 from config import app, db
 from models import User, Note, File, Conspect, Group, Role
 
 
-admin = Admin(app, name='NoteVi', template_mode='bootstrap3')
+admin = Admin(app, name='NoteVi', template_mode='bootstrap3', index_view=DashBordView())
 
 admin.add_view(ModelView(User, db.session, name='Пользователи'))
 admin.add_view(ModelView(Note, db.session, name='Заметки'))

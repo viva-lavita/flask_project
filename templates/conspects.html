@@ -3,6 +3,8 @@
 {% block title %}
   {% if request.endpoint == 'public_conspects' %}
     Публичные конспекты
+  {% elif request.endpoint == 'user_conspects' %}
+    Конспекты пользователя {{ user.username }}
   {% else %}
     Все конспекты
   {% endif %}
@@ -17,12 +19,18 @@
     <div class="col-sm-4 col-lg-2">
     </div>
     <div class="col-sm-4 align-self-center">
+      {% if request.endpoint == 'user_conspects' %}
+        <h1 style="text-align: center;">Конспекты пользователя {{ user.username }}</h1>
+      {% else %}
         <h1 style="text-align: center;">Все конспекты</h1>
+      {% endif %}
     {% else %}
-      {% if request.endpoint == 'public' %}
+      {% if request.endpoint == 'public_conspects' %} 
         <h1 style="text-align: center;">Публичные конспекты отсутствуют</h1>
       {% elif request.endpoint == 'favorite_conspects' %}
         <h1 style="text-align: center;">У вас нет избранных конспектов</h1>
+      {% elif request.endpoint == 'user_conspects' %}
+        <h1 style="text-align: center;">Пользователь не создал ни одного конспекта</h1>
       {% else %}
         <h1 style="text-align: center;">Вы пока не написали ни одного конспекта</h1>
       {% endif %}

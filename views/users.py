@@ -7,7 +7,8 @@ from flask_login import login_required, login_user, logout_user, current_user
 from config import mail, Message
 
 from .app import app, db
-from models import User
+from models import Conspect, Note, User
+from utils.progress import progress
 
 
 logger = logging.getLogger('my_logger')
@@ -110,3 +111,16 @@ def restoring_access():  # Явно нужно переписать + убрат
         flash('Новый пароль отправлен на почту', 'success')
         return redirect(url_for('login'))
     return render_template('login.html')
+
+
+@app.route('/<int:user_id>/profile')
+@login_required
+def profile(user_id):
+    notes = Note.query.filter(Note.user_id == current_user.id)
+    conspects = Conspect.query.filter(Conspect.user_id == current_user.id)
+    progress_bar = progress(current_user)
+    return render_template('profile.html',
+                           notes=notes,
+                           conspects=conspects,
+                           user=current_user,
+                           progress_bar=progress_bar)
