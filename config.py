@@ -29,7 +29,6 @@ app.config['SQLALCHEMY_MIGRATE_REPO'] = os.path.join(basedir, 'db_repository')
 app.config['POSTGRES_PASSWORD'] = os.environ.get('POSTGRES_PASSWORD')
 
 
-
 #######################################
 # Flask-Security
 #######################################
@@ -87,6 +86,12 @@ cache = Cache(app)
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'media', 'uploads/')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'md'}
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+
+
+######################################
+# Flask-Admin
+######################################
+app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 
 
 ###########################################################################

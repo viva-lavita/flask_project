@@ -1,4 +1,3 @@
-import markdown
 import os
 from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
@@ -6,7 +5,7 @@ from flask_login import login_required, current_user
 from config import app, db
 from models import Conspect, conspect_file, favorites, File, Note, note_file
 from utils.files_utils import (
-    add_at_conspects_and_save_files, add_at_conspects_and_save_images,
+    add_at_conspects_and_save_files, add_at_conspect_and_save_images,
     check_file_exsists, check_md_file, get_md
 )
 
@@ -62,6 +61,7 @@ def conspects():
 @app.route('/conspects/<int:id>/add_intro', methods=['GET', 'POST'])
 @login_required
 def add_intro(id):
+    """ Добавление описания, метки public и иллюстраций. """
     conspect = Conspect.get_by_id(id)
     if not current_user.is_author(conspect):
         flash('У вас нет прав на редактирование этого конспекта', 'danger')
@@ -70,10 +70,7 @@ def add_intro(id):
         conspect.intro = request.form['intro']
         conspect.public = request.form.get('public')
         images = request.files.getlist('images')
-        add_at_conspects_and_save_images(images, id)
-            # if not add_files:
-            #     flash('При добавлении картинок произошла ошибка', 'danger')
-            #     return redirect(request.url)
+        add_at_conspect_and_save_images(images, id)
         db.session.commit()
         return redirect(url_for('conspect', id=id))
     return render_template('add_intro.html', conspect=conspect)
@@ -82,6 +79,7 @@ def add_intro(id):
 @app.route('/conspects/<int:id>/confirm')
 @login_required
 def confirmation_conspect(id):
+    """ Эндпоинт подтверждения удаления. """
     conspect = Conspect.get_by_id(id)
     if not conspect:
         flash(f'Конспект c id-{id} не найден', 'danger')
@@ -95,6 +93,7 @@ def confirmation_conspect(id):
 @app.route('/conspects/<int:id>/delete')
 @login_required
 def delete_conspect(id):
+    """ Удаление конспекта. """
     conspect = Conspect.get_by_id(id)
     if not current_user.is_author(conspect):
         flash('У вас нет прав на удаление этого конспекта', 'danger')
@@ -139,6 +138,7 @@ def delete_all():
 @app.route('/conspects/<int:id>/favorite')
 @login_required
 def favorite_conspect(id):
+    """ Добавление конспекта в избранное. """
     conspect = Conspect.get_by_id(id)
     if not conspect:
         return f'Конспект {id} не найден'
@@ -146,7 +146,7 @@ def favorite_conspect(id):
     try:
         db.session.commit()
         flash('Конспект добавлен в избранное', 'success')
-        return redirect(url_for('conspects'), code=302)
+        return redirect(url_for('conspect', id=id), code=302)
     except Exception as e:
         flash(f'При добавлении конспекта в избранное произошла ошибка {e}',
               'danger')
@@ -156,6 +156,7 @@ def favorite_conspect(id):
 @app.route('/conspects/<int:id>/unfavorite')
 @login_required
 def unfavorite_conspect(id):
+    """ Удаление конспекта из избранного. """
     conspect = Conspect.get_by_id(id)
     if not conspect:
         return f'Конспект {id} не найден'
@@ -173,6 +174,7 @@ def unfavorite_conspect(id):
 @app.route('/conspects/favorites')
 @login_required
 def favorite_conspects():
+    """ Список всех добавленных в избранное конспектов. """
     conspects = (
         Conspect.query.filter(Conspect.favorites.contains(current_user))
                       .order_by(Conspect.id.desc())
@@ -183,12 +185,14 @@ def favorite_conspects():
 
 @app.route('/conspects/public')
 def public_conspects():
+    """ Список конспектов в публичном доступе. """
     conspects = Conspect.get_public_conspects()
     return render_template('conspects.html', conspects=conspects)
 
 
 @app.route('/conspects/<int:conspect_id>/remove_images')
 def remove_images(conspect_id):
+    """ Эндпоинт для кнопки удаления картинок из конспекта. """
     conspect = Conspect.get_by_id(conspect_id)
     if not current_user.is_author(conspect):
         flash('Вы не можете удалять фотографии из чужого конспекта', 'danger')
@@ -213,4 +217,3 @@ def remove_images(conspect_id):
         flash(f'При удалении файла из заметки произошла ошибка {e}',
               'danger')
         return redirect(url_for('conspect', id=conspect_id), code=302)
-

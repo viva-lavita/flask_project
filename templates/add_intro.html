@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{% if request.endpoint == 'add_intro' %}
-Добавить описание конспекта {{ conspect.name }}
-{% else %}
-{{ conspect.intro }}
-{% endif %}
+  {% if request.endpoint == 'add_intro' %}
+    Добавить описание конспекта {{ conspect.name }}
+  {% else %}
+    {{ conspect.intro }}
+  {% endif %}
 {% endblock %}
 
 {% block content %}

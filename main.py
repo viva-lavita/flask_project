@@ -1,6 +1,10 @@
 import sys
+
 from config import app, db
-from views.app import *
+from views import *
+
+from admin.admin import admin  # не удалять, админка отвалится
+from models import User, Group, Role
 
 
 # Отправка логирования на почту
@@ -35,11 +39,29 @@ logger = logging.getLogger()
 logger.addHandler(file_handler)
 
 
+def create_admin():
+    if db.session.query(User).filter(User.username == 'admin').first():
+        return
+    role = Role(name='admin')
+    group = Group(name='administrators')
+    group.roles.append(role)
+    password = '1478951'
+    user = User(
+        username='admin',
+        email='pCwfK7@example.com',
+    )
+    user.set_password(password)
+    user.groups.append(group)
+    db.session.add(user)
+    db.session.commit()
+
+
 # для локального запуска
-if __name__ == '__main__': 
+if __name__ == '__main__':
     with app.app_context():
         try:
             db.create_all()
+            create_admin()
             sys.stdout.write('База данных обновлена')
         except Exception as e:
             sys.stdout.write(f'Ошибка создания БД: + {e}')

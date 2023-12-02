@@ -5,9 +5,11 @@ from flask_login import login_required, current_user
 from config import app, db
 from models import File, Note
 from utils.files_utils import add_at_note_and_save_files
+from utils.decorators import roles_required
 
 
 @app.route('/notes')
+@roles_required('admin')
 def notes():
     if current_user.is_authenticated:
         notes = (Note.query

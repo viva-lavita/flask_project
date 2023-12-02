@@ -4,7 +4,7 @@ from typing import Optional
 
 import markdown
 
-from views.notes import app, db
+from config import app, db
 from models import File, Note, Conspect
 
 
@@ -105,7 +105,7 @@ def add_at_conspects_and_save_files(files: list, user_id: int) -> list:
     return conspect_ids
 
 
-def add_at_conspects_and_save_images(images: list, conspect_id: int) -> list:
+def add_at_conspect_and_save_images(images: list, conspect_id: int) -> list:
     """
     Массовая загрузка картинок в конспект.
     """
@@ -173,4 +173,10 @@ def get_md(filename):
             extensions=['fenced_code',
                         'codehilite',
                         'footnotes',
-                        'md_in_html'])
+                        'md_in_html',
+                        'tables',
+                        'meta',
+                        'nl2br',
+                        'sane_lists',
+                        'smarty',
+                        'legacy_attrs'])

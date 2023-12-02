@@ -1,35 +1,23 @@
-from functools import wraps
+import functools
 
-from flask import current_app, g, request, has_request_context
-from werkzeug.local import LocalProxy
-
-
-current_user = LocalProxy(lambda: _get_user())
-EXEMPT_METHODS = {"OPTIONS"}
+from flask import abort
+from flask_login import current_user
 
 
-def _get_user():
-    if has_request_context():
-        if "_login_user" not in g:
-            current_app.login_manager._load_user()
+def roles_required(*roles):
+    """
+    Этот декоратор используется перед маршрутами,
+    чтобы убедиться, что текущий_пользователь имеет право
+    доступа к этому маршруту.
+    """
+    def holder(action):
+        @functools.wraps(action)
+        def wrapper(*args, **kwargs):
+            nonlocal roles
+            if current_user.is_authenticated and current_user.has_roles(*roles):
+                return action(*args, **kwargs)
+            return abort(401)
 
-        return g._login_user
+        return wrapper
 
-    return None
-
-
-def login_required(func):
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        if request.method in EXEMPT_METHODS or current_app.config.get("LOGIN_DISABLED"):
-            pass
-        elif not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-
-        # flask 1.x compatibility
-        # current_app.ensure_sync is only available in Flask >= 2.0
-        if callable(getattr(current_app, "ensure_sync", None)):
-            return current_app.ensure_sync(func)(*args, **kwargs)
-        return func(*args, **kwargs)
-
-    return decorated_view
+    return holder

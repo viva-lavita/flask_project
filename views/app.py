@@ -1,16 +1,15 @@
-import os
-
 from flask import (
     render_template, redirect, flash, request,
     send_from_directory, url_for)
 from werkzeug.utils import secure_filename
 
 from config import app, db, cache
-from .notes import *
-from .users import *
-from .test_api import *
-from .conspects import *
 
+
+# @app.route('/admin/')  # написать админку
+# @login_required
+# def admin():
+#     return render_template('admin.html')
 
 @app.route('/downloads/<name>', methods=['GET'])
 def download_file(name):

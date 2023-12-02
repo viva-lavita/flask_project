@@ -13,12 +13,6 @@ from models import User
 logger = logging.getLogger('my_logger')
 
 
-@app.route('/admin/')  # написать админку
-@login_required
-def admin():
-    return render_template('admin.html')
-
-
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -84,7 +78,7 @@ def register():
 
 
 @app.route('/restoring_access', methods=['POST', 'GET'])
-def restoring_access(): # Явно нужно переписать + убрать текст
+def restoring_access():  # Явно нужно переписать + убрать текст
     if current_user.is_authenticated:
         return redirect(url_for('notes'))
     if request.method == 'POST':
