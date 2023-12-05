@@ -151,3 +151,24 @@ p {
   white-space: pre-line;
   text-align : left;
 } */
+
+
+.card-author {
+  display: block;
+}
+
+#visit {
+}
+
+.visit_cardcss {
+  position: absolute;
+  visibility: hidden;
+  z-index: -1;
+}
+
+#visit:hover .visit_cardcss {
+  cursor: pointer;
+  position: absolute;
+  visibility: visible;
+  z-index: 9999;
+}

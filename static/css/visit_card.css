@@ -1,0 +1,8 @@
+.visit_cardcss {
+    position: absolute;
+}
+
+.visit_cardcss:hover {
+    cursor: pointer;
+    visibility: visible;
+}
