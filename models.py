@@ -175,7 +175,7 @@ class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False, default=' ')
     intro = db.Column(db.String(200), nullable=False, default=' ')
-    text = db.Column(db.Text, nullable=False, default=' ')
+    text = db.Column(db.Text)
     user_id = db.Column(db.Integer,
                         db.ForeignKey('user.id'))
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)

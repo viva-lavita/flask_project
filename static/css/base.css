@@ -143,21 +143,12 @@ body {
   display: block !important;
 }
 
-p {
+.card-text {
   white-space: pre-line;
 }
-
-/* h5 {
-  white-space: pre-line;
-  text-align : left;
-} */
-
 
 .card-author {
   display: block;
-}
-
-#visit {
 }
 
 .visit_cardcss {
