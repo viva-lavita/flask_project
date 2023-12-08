@@ -24,7 +24,7 @@
         <div class="col-lg-4">
           <div class="card mb-4">
             <div class="card-body text-center">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-2.webp" alt="avatar"
                 class="rounded-circle img-fluid" style="width: 150px;">
               <h5 class="my-3">{{ user.username }}</h5>
               <p class="text-muted mb-1">{{ user.profession}}</p>
@@ -120,8 +120,7 @@
             <div class="col-md-6">
               <div class="card mb-4 mb-md-0">
                 <div class="card-body">
-                  <p class="mb-4"><span class="text-primary font-italic me-1">Прогресс</span> профиля
-                  </p>
+                  <p class="mb-4"><span class="text-primary font-italic me-1">Прогресс</span> профиля</p>
                   <p class="mb-1" style="font-size: .77rem;">заполнен на {{ progress_bar }}%</p>
                   <div class="progress rounded" style="height: 5px;">
                     <div class="progress-bar" role="progressbar" style="width: {{ progress_bar }}%" aria-valuenow="progress_bar"
@@ -136,11 +135,10 @@
                   <p class="mb-4"><span class="text-primary font-italic me-1">Ресурсы</span> профиля</p>
                   <div class="row">
                     <div class="col text-center">
-                        <h6 class="h2">{{ (user.conspects).count() }}</h6>
-                        <p class="m-0px font-w-600">Конспектов</p>
-                    <div class="col text-center">
-                        <h6 class="h2">{{ (user.notes).count() }}</h6>
-                        <p class="m-0px font-w-600">Заметок</p>
+                      <h6 class="h2">{{ (user.conspects).count() }}</h6>
+                      <p class="m-0px font-w-600">Конспектов</p>
+                      <h6 class="h2">{{ (user.notes).count() }}</h6>
+                      <p class="m-0px font-w-600">Заметок</p>
                     </div>
                   </div>
                 </div>

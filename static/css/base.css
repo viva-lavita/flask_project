@@ -143,11 +143,24 @@ body {
   display: block !important;
 }
 
-p {
+.card-text {
   white-space: pre-line;
 }
 
-/* h5 {
-  white-space: pre-line;
-  text-align : left;
-} */
+.card-author {
+  display: block;
+}
+
+.visit_cardcss {
+  position: absolute;
+  visibility: hidden;
+  z-index: -1;
+}
+
+#visit:hover .visit_cardcss {
+  cursor: pointer;
+  position: absolute;
+  visibility: visible;
+  z-index: 9999;
+  width: 750px;
+}

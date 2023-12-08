@@ -50,21 +50,21 @@
     </div>
     {% endif %}
     {% if conspects|length > 0 %}
-      {% for conspect in conspects %}
+      {% for item in conspects %}
         <div class="card container col-lg-8 p-0">
           <div class="card-body container">
-            <h5 class="card-title col-7">{{ conspect.name }}</h5>
+            <h5 class="card-title col-7">{{ item.name }}</h5>
             <il class="align-self-end">{% include 'includes/btn_conspect.html' %}</il>
           </div>
           <div class="card-body container">
-            {% if conspect.intro|length > 3 %}
-            <p class="card-text">{{ conspect.intro }}</p>
+            {% if item.intro|length > 3 %}
+            <p class="card-text">{{ item.intro }}</p>
             {% endif %}
-            <p class="card-author"><b>Автор: {{ conspect.author.username }}</b></p>
-            <a href="{{ url_for('conspect', id=conspect.id) }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
+            <span class="card-author mb-3"><b><span id="visit">Автор: {{ item.author.username }} {% include 'includes/visit_card.html' %}</span></b></span>
+            <a href="{{ url_for('conspect', id=item.id) }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
                 Подробнее
             </a>
-            <note class="date col">Загружен: {{ conspect.add_date }}</note>
+            <note class="date col">Загружен: {{ item.add_date }}</note>
           </div>
           <div class="b-example-divider" style="width: 100%;"></div>
         </div>

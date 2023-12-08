@@ -14,22 +14,22 @@
   <div class="card">
     <h3  class='mt-5'style="text-align: center; word-wrap: break-word;">{{ ' '.join(name.split('_')) }}</h3>
     <il class="align-self-end">{% include 'includes/btn_conspect.html' %}</il>
-    {% if conspect.images|length > 0 %}
-      {% for file in conspect.images %}
+    {% if item.images|length > 0 %}
+      {% for file in item.images %}
         
         <img src="{{ url_for('static', filename='media/uploads/' + file.name) }}" class="card-img-top featurette-image img-fluid mx-auto" alt="только картинки=)" style="height: 20%;">
 
       {% endfor %}
     {% endif %}
-    {% if conspect.intro|length > 2 %}
+    {% if item.intro|length > 2 %}
     <div class="card-body container">
-      <i class="card-title text-center">{{ conspect.intro }}</i>
+      <i class="card-title text-center">{{ item.intro }}</i>
     </div>
     {% endif %}
     <div class="card-body">
       <p class="card-text">{{ markdown|safe }}</p>
-      <p><b>Автор: {{ conspect.author.username }}</b></p>
-      <note class="date">Загружен: {{ conspect.add_date }}</note>
+      <p><b>Автор: {{ item.author.username }}</b></p>
+      <note class="date">Загружен: {{ item.add_date }}</note>
     </div>
     <div class="b-example-divider" style="width: 100%;"></div>
   </div>

@@ -54,7 +54,7 @@ def note(id):
     if not note:
         flash('Заметка не найдена', 'danger')
         return redirect(url_for('notes'))
-    return render_template('note.html', note=note)
+    return render_template('note.html', item=note)
 
 
 @app.route('/notes/<int:id>/delete')

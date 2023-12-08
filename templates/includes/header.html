@@ -69,14 +69,14 @@
           {% if current_user.is_authenticated %}
             <div class="dropdown text-center text-md-end mt-2 mt-md-1">
               <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="mdo" width="32" height="32" class="rounded-circle">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-2.webp" alt="mdo" width="32" height="32" class="rounded-circle">
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 {% if current_user.is_admin %}
                   <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Админка</a></li>
                 {% endif %}
-                <li><a class="dropdown-item" href="#">New project...</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('conditions') }}">Settings</a></li>
+                <!-- <li><a class="dropdown-item" href="#">New project...</a></li> -->
+                <li><a class="dropdown-item" href="{{ url_for('conditions') }}">Настройки</a></li>
                 <li><a class="dropdown-item" href="{{ url_for('profile', user_id=current_user.id) }}">Профиль</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выход</a></li>

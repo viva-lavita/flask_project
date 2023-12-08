@@ -23,7 +23,7 @@ def conspect(id):
     name = conspect.name.rsplit('.', 1)[0]
     return render_template('conspect.html',
                            markdown=html_text,
-                           conspect=conspect,
+                           item=conspect,
                            name=name)
 
 
