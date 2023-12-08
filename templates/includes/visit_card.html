@@ -1,8 +1,7 @@
-{% if current_user.is_authenticated %}
 <section class="visit_cardcss container">
   <div class="row d-flex justify-content-center align-items-center">
-    <div class="col-lg-9">
-      <div class="card" style="border-radius: 15px;">
+    <div class="col-lg-9 ">
+      <div class="card" >
         <div class="card-body p-4">
           <div class="d-flex">
             <div class="flex-shrink-0">
@@ -27,10 +26,16 @@
                   <p class="mb-0">8.5</p>
                 </div>
               </div>
+              {% if current_user.is_authenticated %}
               <div class="d-flex pt-1">
                 <button type="button" class="btn btn-outline-success me-1 flex-grow-1">Чат</button>
                 <button type="button" class="btn btn-outline-success flex-grow-1">Подписаться</button>
               </div>
+              {% else %}
+              <div class="d-flex pt-1">
+                <div>Войдите для того, чтобы увидеть дополнительную информацию</div>
+              </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -38,6 +43,3 @@
     </div>
   </div>
 </section>
-{% else %}
-<h1 style="text-align: center;">Войдите или зарегистрируйтесь</h1>
-{% endif %}

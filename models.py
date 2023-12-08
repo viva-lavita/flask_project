@@ -71,14 +71,14 @@ class User(db.Model):
                                 lazy='dynamic',
                                 cascade='all, delete'
                                 )
-    name = db.Column(db.String(100), default='--')
-    surname = db.Column(db.String(100), default='--')
-    birth_date = db.Column(db.Date, default='--')
-    phone = db.Column(db.String(100), default='--')
-    city = db.Column(db.String(200), default='--')
-    profession = db.Column(db.String(100), default='--')
-    site = db.Column(db.String(100), default='--')
-    github = db.Column(db.String(100), default='--')
+    name = db.Column(db.String(100))
+    surname = db.Column(db.String(100))
+    birth_date = db.Column(db.Date)
+    phone = db.Column(db.String(100))
+    city = db.Column(db.String(200))
+    profession = db.Column(db.String(100))
+    site = db.Column(db.String(100))
+    github = db.Column(db.String(100))
 
     def __repr__(self):
         return '<User %r>' % self.username

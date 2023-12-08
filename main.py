@@ -67,8 +67,8 @@ def create_admin():
 if __name__ == '__main__':
     with app.app_context():
         try:
-            db.create_all()
-            create_admin()
+            # db.create_all()
+            # create_admin()
             sys.stdout.write('База данных обновлена')
         except Exception as e:
             sys.stdout.write(f'Ошибка создания БД: + {e}')

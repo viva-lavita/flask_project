@@ -162,4 +162,5 @@ body {
   position: absolute;
   visibility: visible;
   z-index: 9999;
+  width: 750px;
 }
