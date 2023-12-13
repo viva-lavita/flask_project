@@ -3,7 +3,9 @@ from flask import (
     send_from_directory, url_for)
 from werkzeug.utils import secure_filename
 
-from config import app, db, cache
+from main import db
+from views import app
+# from config import cache
 
 
 # @app.route('/admin/')  # написать админку
@@ -37,7 +39,7 @@ def bad_gateway(error):
 
 @app.route('/index')
 @app.route('/')
-@cache.cached(timeout=60)
+# @cache.cached(timeout=60)
 def index():
     endpoint = request.endpoint
     return render_template('index.html', endpoint=endpoint)

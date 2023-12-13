@@ -28,8 +28,16 @@
               </div>
               {% if current_user.is_authenticated %}
               <div class="d-flex pt-1">
+                {% if item.author.id != current_user.id %}
                 <button type="button" class="btn btn-outline-success me-1 flex-grow-1">Чат</button>
-                <button type="button" class="btn btn-outline-success flex-grow-1">Подписаться</button>
+                {% if not current_user.is_followed(item.author) %}
+                <a href="{{ url_for('app.follow', user_id=item.author.id) }}" type="button" class="btn btn-outline-success flex-grow-1">Подписаться</a>
+                {% else %}
+                <a href="{{ url_for('app.unfollow', user_id=item.author.id) }}" type="button" class="btn btn-outline-warning flex-grow-1">Отписаться</a>
+                {% endif %}
+                {% else %}
+                <p>Это ваш аккаунт</p>
+                {% endif %}
               </div>
               {% else %}
               <div class="d-flex pt-1">

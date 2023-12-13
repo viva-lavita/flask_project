@@ -1,0 +1,57 @@
+{% extends 'base.html' %} 
+
+{% block title %}
+Flask Chat 💬
+{% endblock %}
+
+{% block scripts %}
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous">
+</script>
+{% endblock %}
+
+{% block styles %}
+<link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/style.css')}}"
+    />
+{% endblock %}
+
+{% block content %}
+<div id="home-container">
+  <h1 id="home-header">Flask Chat 💬</h1>
+
+  {% if error %}
+  <p id="error">{{error}}</p>
+  {% endif %}
+
+  <form method="post" id="chat-widget-home">
+    <div id="name-input">
+      <label for="name">Enter your name</label>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        placeholder="Enter name"
+        value="{{name}}"
+      />
+    </div>
+    <div>
+      <label for="code" id="code-label">Enter chat room code</label>
+      <input
+        type="text"
+        id="code"
+        name="code"
+        placeholder="Enter code"
+        value="{{code}}"
+      />
+      <button type="submit" id="join" name="join">Join</button>
+    </div>
+    <hr />
+    <button type="submit" id="create" name="create">Create Room</button>
+  </form>
+</div>
+{% endblock %}

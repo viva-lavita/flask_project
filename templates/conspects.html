@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  {% if request.endpoint == 'public_conspects' %}
+  {% if request.endpoint == 'app.public_conspects' %}
     Публичные конспекты
-  {% elif request.endpoint == 'user_conspects' %}
+  {% elif request.endpoint == 'app.user_conspects' %}
     Конспекты пользователя {{ user.username }}
   {% else %}
     Все конспекты
@@ -12,25 +12,27 @@
 
 {% block content %}
 {% include 'includes/flash.html' %}
-{% if request.endpoint == 'public_conspects' or current_user.is_authenticated %}
+{% if request.endpoint == 'app.public_conspects' or current_user.is_authenticated %}
 <div class="container mt-5">
   <div class="row justify-content-md-center">
     {% if conspects|length > 0 %}
     <div class="col-sm-4 col-lg-2">
     </div>
     <div class="col-sm-4 align-self-center">
-      {% if request.endpoint == 'user_conspects' %}
+      {% if request.endpoint == 'app.user_conspects' %}
         <h1 style="text-align: center;">Конспекты пользователя {{ user.username }}</h1>
       {% else %}
         <h1 style="text-align: center;">Все конспекты</h1>
       {% endif %}
     {% else %}
-      {% if request.endpoint == 'public_conspects' %} 
+      {% if request.endpoint == 'app.public_conspects' %} 
         <h1 style="text-align: center;">Публичные конспекты отсутствуют</h1>
-      {% elif request.endpoint == 'favorite_conspects' %}
+      {% elif request.endpoint == 'app.favorite_conspects' %}
         <h1 style="text-align: center;">У вас нет избранных конспектов</h1>
-      {% elif request.endpoint == 'user_conspects' %}
+      {% elif request.endpoint == 'app.user_conspects' %}
         <h1 style="text-align: center;">Пользователь не создал ни одного конспекта</h1>
+      {% elif request.endpoint ==  'app.follow_conspects'%}
+        <h1 style="text-align: center;">Вы пока ни на кого не подписаны, либо у этого автора нет конспектов</h1>
       {% else %}
         <h1 style="text-align: center;">Вы пока не написали ни одного конспекта</h1>
       {% endif %}
@@ -60,8 +62,8 @@
             {% if item.intro|length > 3 %}
             <p class="card-text">{{ item.intro }}</p>
             {% endif %}
-            <span class="card-author mb-3"><b><span id="visit">Автор: {{ item.author.username }} {% include 'includes/visit_card.html' %}</span></b></span>
-            <a href="{{ url_for('conspect', id=item.id) }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
+            <span class="card-author mb-3"><b><span id="visit">Автор: {{ item.author.username | truncate(30) }} {% include 'includes/visit_card.html' %}</span></b></span>
+            <a href="{{ url_for('app.conspect', id=item.id) }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
                 Подробнее
             </a>
             <note class="date col">Загружен: {{ item.add_date }}</note>

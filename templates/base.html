@@ -2,13 +2,16 @@
 <html lang="ru" data-bs-theme="dark">
 <head>
     <script src="{{ url_for('static', filename='js/color-modes.js')}}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fixed-footer.js')}}" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="canonical" href="https://дописать_главный_url">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/css@3')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/drop-menu.css')}}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/base.css')}}" rel="stylesheet">
@@ -22,12 +25,14 @@
     {% include 'includes/dropdown_light.html' %}
     {% include 'includes/header.html' %}
     <div class="wrapper">
-      <main class="main">
+      <main class="main" id="root">
         {% block content %} {% endblock %}
       </main>
     </div>
     {% include 'includes/footer.html' %}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/dropdown_light.js')}}"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+  <!-- Выяснить потом, зачем я его сюда поставила. Вроде ненужен.  -->
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script> 
 </body>
 </html>

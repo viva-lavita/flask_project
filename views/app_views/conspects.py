@@ -2,7 +2,7 @@ import os
 from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
-from config import app, db
+from .app import app, db
 from models import (
     Conspect, conspect_file, favorites, File, Note, note_file, User
 )
@@ -17,7 +17,7 @@ def conspect(id):
     conspect = Conspect.get_by_id(id)
     if not conspect:
         flash('Конспект не найден', 'danger')
-        return redirect(url_for('conspects'))
+        return redirect(url_for('app.conspects'))
 
     html_text = get_md(conspect.name)
     name = conspect.name.rsplit('.', 1)[0]
@@ -65,14 +65,14 @@ def add_intro(id):
     conspect = Conspect.get_by_id(id)
     if not current_user.is_author(conspect):
         flash('У вас нет прав на редактирование этого конспекта', 'danger')
-        return redirect(url_for('conspect', id=id))
+        return redirect(url_for('app.conspect', id=id))
     if request.method == 'POST':
         conspect.intro = request.form['intro']
         conspect.public = request.form.get('public')
         images = request.files.getlist('images')
         add_at_conspect_and_save_images(images, id)
         db.session.commit()
-        return redirect(url_for('conspect', id=id))
+        return redirect(url_for('app.conspect', id=id))
     return render_template('add_intro.html', conspect=conspect)
 
 
@@ -83,10 +83,10 @@ def confirmation_conspect(id):
     conspect = Conspect.get_by_id(id)
     if not conspect:
         flash(f'Конспект c id-{id} не найден', 'danger')
-        return redirect(url_for('conspects'))
+        return redirect(url_for('app.conspects'))
     if not current_user.is_author(conspect):
         flash('У вас нет прав на удаление этого конспекта', 'danger')
-        return redirect(url_for('conspect', id=id))
+        return redirect(url_for('app.conspect', id=id))
     return render_template('confirmation.html', conspect=conspect)
 
 
@@ -97,10 +97,10 @@ def delete_conspect(id):
     conspect = Conspect.get_by_id(id)
     if not current_user.is_author(conspect):
         flash('У вас нет прав на удаление этого конспекта', 'danger')
-        return redirect(url_for('conspect', id=id))
+        return redirect(url_for('app.conspect', id=id))
     if not conspect:
         flash(f'Конспект c id-{id} не найден', 'danger')
-        return redirect(url_for('conspects'))
+        return redirect(url_for('app.conspects'))
     name = conspect.name
     file = File.query.filter(File.name == name).first()
     try:
@@ -113,8 +113,8 @@ def delete_conspect(id):
                   'success')
     except Exception as e:
         flash(f'При удалении конспекта произошла ошибка: {e}', 'danger')
-        return redirect(url_for('conspects'))
-    return redirect(url_for('conspects'))
+        return redirect(url_for('app.conspects'))
+    return redirect(url_for('app.conspects'))
 
 
 @app.route('/delete_all')   # эндпоинт самоуничтожения. Для отладки!
@@ -132,7 +132,7 @@ def delete_all():
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         os.remove(file_path)
-    return redirect(url_for('upload_conspects'))
+    return redirect(url_for('app.upload_conspects'))
 
 
 @app.route('/conspects/<int:id>/favorite')
@@ -146,11 +146,11 @@ def favorite_conspect(id):
     try:
         db.session.commit()
         flash('Конспект добавлен в избранное', 'success')
-        return redirect(url_for('conspect', id=id), code=302)
+        return redirect(url_for('app.conspect', id=id), code=302)
     except Exception as e:
         flash(f'При добавлении конспекта в избранное произошла ошибка {e}',
               'danger')
-        return redirect(url_for('conspect', id=id), code=302)
+        return redirect(url_for('app.conspect', id=id), code=302)
 
 
 @app.route('/conspects/<int:id>/unfavorite')
@@ -164,11 +164,11 @@ def unfavorite_conspect(id):
     try:
         db.session.commit()
         flash('Конспект удален из избранного', 'success')
-        return redirect(url_for('conspect', id=id), code=302)
+        return redirect(url_for('app.conspect', id=id), code=302)
     except Exception as e:
         flash(f'При удалении конспекта из избранного произошла ошибка {e}',
               'danger')
-        return redirect(url_for('conspects'), code=302)
+        return redirect(url_for('app.conspects'), code=302)
 
 
 @app.route('/conspects/favorites')
@@ -196,10 +196,10 @@ def remove_images(conspect_id):
     conspect = Conspect.get_by_id(conspect_id)
     if not current_user.is_author(conspect):
         flash('Вы не можете удалять фотографии из чужого конспекта', 'danger')
-        return redirect(url_for('conspect', id=conspect_id))
+        return redirect(url_for('app.conspect', id=conspect_id))
     if not conspect:
         flash(f'Конспект c id-{conspect_id} не найден', 'danger')
-        return redirect(url_for('conspects'))
+        return redirect(url_for('app.conspects'))
     files = File.query.filter(File.img_conspects.contains(conspect)).all()
     try:
         for file in files:
@@ -212,17 +212,17 @@ def remove_images(conspect_id):
                                  file.name)
                 )
         db.session.commit()
-        return redirect(url_for('add_intro', id=conspect_id), code=302)
+        return redirect(url_for('app.add_intro', id=conspect_id), code=302)
     except Exception as e:
         flash(f'При удалении файла из заметки произошла ошибка {e}',
               'danger')
-        return redirect(url_for('conspect', id=conspect_id), code=302)
+        return redirect(url_for('app.conspect', id=conspect_id), code=302)
 
 
 @app.route('/user_<int:user_id>/conspects')
 def user_conspects(user_id):
     if user_id == current_user.id:
-        return redirect(url_for('conspects'))
+        return redirect(url_for('app.conspects'))
     user = User.get_by_id(user_id)
     if current_user.is_authenticated:
         conspects = (Conspect.query
@@ -233,3 +233,11 @@ def user_conspects(user_id):
                                conspects=conspects,
                                user=user)
     return render_template('conspects.html')
+
+
+@app.route('/follow_conspects')
+@login_required
+def follow_conspects():
+    follows_id = [author.id for author in current_user.followed_list()]
+    conspects = Conspect.query.filter(Conspect.user_id.in_(follows_id)).all()
+    return render_template('conspects.html', conspects=conspects)

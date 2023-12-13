@@ -23,7 +23,7 @@
           <div class="carousel-caption text-start">
             <h1>Сделай заметку.</h1>
             <p class="opacity-75">А то забудешь фичу. Мы все люди.</p>
-            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('create_note')}}">Делаю!</a></p>
+            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.create_note')}}">Делаю!</a></p>
           </div>
         </div>
       </div>
@@ -33,7 +33,7 @@
           <div class="carousel-caption">
             <h1>Просмотри заметки.</h1>
             <p>Может там была идея на мильЕн.</p>
-            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('notes')}}">Смотрю!</a></p>
+            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.notes')}}">Смотрю!</a></p>
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@
           <div class="carousel-caption text-end">
             <h1>Пересмотри избранные заметки</h1>
             <p>Убури ненужные. Не засоряй себе мозг.</p>
-            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('favorites')}}">Удаляю!</a></p>
+            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.favorites')}}">Удаляю!</a></p>
           </div>
         </div>
       </div>
@@ -65,13 +65,13 @@
         <img src="{{ url_for('static', filename='img/index/666.jpg')}}" class="bd-placeholder-img rounded-circle" width="140" height="140" role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title></ш>
         <h2 class="fw-normal">Зарегистрируйся!</h2>
         <p>И создай заметку!=) Добавь в избранное, сделай публичной.</p>
-        <p><a class="btn btn-outline-success" href="{{ url_for('register')}}">Регаюсь »</a></p>
+        <p><a class="btn btn-outline-success" href="{{ url_for('app.register')}}">Регаюсь »</a></p>
       </div><!-- /.col-lg-4 -->
       <div class="col-lg-4">
         <img src="{{ url_for('static', filename='img/index/cat.gif')}}" class="bd-placeholder-img rounded-circle" width="140" height="140" role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title></ш>
         <h2 class="fw-normal">Разлогинься!</h2>
         <p>Проверь функционал =)</p>
-        <p><a class="btn btn-outline-success" href="{{ url_for('logout')}}">Выхожу из акка »</a></p>
+        <p><a class="btn btn-outline-success" href="{{ url_for('app.logout')}}">Выхожу из акка »</a></p>
       </div><!-- /.col-lg-4 -->
       <div class="col-lg-4">
         <img src="{{ url_for('static', filename='img/index/888.gif')}}" class="bd-placeholder-img rounded-circle" width="140" height="140" role="img" aria-label="Placeholder" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title></ш>

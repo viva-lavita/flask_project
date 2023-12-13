@@ -4,7 +4,9 @@ from typing import Optional
 
 import markdown
 
-from config import app, db
+from main import db
+from new_main import app_main as app
+# from views.app_views.app import app
 from models import File, Note, Conspect
 
 

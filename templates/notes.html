@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  {% if request.endpoint == 'public' %}
+  {% if request.endpoint == 'app.public' %}
     Публичные заметки
-  {% elif request.endpoint == 'user_notes' %}
+  {% elif request.endpoint == 'app.user_notes' %}
     Заметки пользователя {{ user.username }}
+  {% elif request.endpoint == 'app.follow_notes' %}
+    Заметки авторов, на которые вы подписаны
   {% else %}
     Все заметки
   {% endif %}
@@ -12,25 +14,27 @@
 
 {% block content %}
 {% include 'includes/flash.html' %}
-{% if request.endpoint == 'public' or current_user.is_authenticated %}
+{% if request.endpoint == 'app.public' or current_user.is_authenticated %}
 <div class="container mt-5">
   <div class="row justify-content-md-center">
     {% if notes|length > 0 %}
     <div class="col-sm-4 col-lg-2">
     </div>
     <div class="col-sm-4 align-self-center">
-      {% if request.endpoint == 'user_notes' %}
+      {% if request.endpoint == 'app.user_notes' %}
         <h1 style="text-align: center;">Заметки пользователя {{ user.username }}</h1>
       {% else %}
         <h1 style="text-align: center;">Все заметки</h1>
       {% endif %}
     {% else %}
-      {% if request.endpoint == 'public' %}
+      {% if request.endpoint == 'app.public' %}
         <h1 style="text-align: center;">Публичные заметки отсутствуют</h1>
-      {% elif request.endpoint == 'favorites' %}
+      {% elif request.endpoint == 'app.favorites' %}
         <h1 style="text-align: center;">У вас нет избранных заметок</h1>
-      {% elif request.endpoint == 'user_notes' %}
+      {% elif request.endpoint == 'app.user_notes' %}
         <h1 style="text-align: center;">Пользователь не создал ни одной заметки</h1>
+      {% elif request.endpoint ==  'app.follow_notes'%}
+        <h1 style="text-align: center;">Вы пока ни на кого не подписаны, либо у этого автора нет заметок</h1>
       {% else %}
         <h1 style="text-align: center;">Вы пока не написали ни одной заметки</h1>
       {% endif %}
@@ -58,7 +62,7 @@
           </div>
           <div class="card-body container">
             <p class="card-text">{{ item.intro }}</p>
-            <span class="card-author mb-3"><b><span id="visit">Автор: {{ item.author.username }}{% include 'includes/visit_card.html' %}</span></b></span>
+            <span class="card-author mb-3"><b><span id="visit">Автор: {{ item.author.username | truncate(30) }}{% include 'includes/visit_card.html' %}</span></b></span>
             <a href="/notes/{{ item.id }}" class="btn btn-success" data-toggle="button" aria-pressed="false" autocomplete="off">
                 Подробнее
             </a>

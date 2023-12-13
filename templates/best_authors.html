@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Ваши подписки
+{% endblock %}
+
+{% block content %}
+{% include 'includes/flash.html' %}
+<div class="container mt-5">
+  {% if follows %}
+  <h1 class="text-center">Ваши подписки</h1>
+  {% for user in follows %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling{{ user.id }}" aria-controls="offcanvasScrolling{{ user.id }}">{{ user.username }}</h5>
+            {% include 'includes/profile_offcanvas.html' %}
+            <p class="card-text">{{ user.email }}</p>
+        </div>
+    </div>
+  {% endfor %}
+  {% else %}
+    <h1 class="text-center">Вы ещё не подписались ни на одного пользователя</h1>
+  {% endif %}
+</div>
+{% endblock %}
