@@ -135,7 +135,7 @@
     padding: 8px 5px;
   }
   
-  #leave-chat-btn {
+  /* #leave-chat-btn {
     color: white;
     background-color: rgb(226, 29, 29);
     font-weight: 800;
@@ -146,7 +146,7 @@
     margin-top: 5px;
     border-radius: 10px;
     transition: all 0.1s ease-in;
-  }
+  } */
   
   #leave-chat-btn:hover {
     color: rgb(226, 29, 29);
@@ -161,7 +161,7 @@
     border-radius: 15px;
   }
   
-  #msgs-container {
+  #message-list {
     position: absolute;
     height: calc(100% - 50px);
     width: 100%;

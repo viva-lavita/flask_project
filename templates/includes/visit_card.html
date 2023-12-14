@@ -29,7 +29,7 @@
               {% if current_user.is_authenticated %}
               <div class="d-flex pt-1">
                 {% if item.author.id != current_user.id %}
-                <button type="button" class="btn btn-outline-success me-1 flex-grow-1">Чат</button>
+                <a href="{{ url_for('app.chat', user_id=item.author.id) }}" type="button" class="btn btn-outline-success me-1 flex-grow-1">Чат</ф>
                 {% if not current_user.is_followed(item.author) %}
                 <a href="{{ url_for('app.follow', user_id=item.author.id) }}" type="button" class="btn btn-outline-success flex-grow-1">Подписаться</a>
                 {% else %}

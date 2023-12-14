@@ -68,6 +68,69 @@ follows = db.Table(
 )
 
 
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.body)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'sender_id': self.sender_id,
+            'recipient_id': self.recipient_id,
+            'body': self.body,
+            'timestamp': self.timestamp.strftime('%Y.%m.%d %H:%M:%S'),
+            'chat_id': self.chat_id
+        }
+
+
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    messages = db.relationship(
+        'Message', backref='chat', lazy='dynamic',
+        primaryjoin="or_(Chat.id==Message.sender_id, Chat.id==Message.recipient_id, Chat.id==Message.chat_id)"
+    )
+    create_date = db.Column(db.Date(), default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Chat %r>' % self.id
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def interlocutor(self, user_id):
+        """ Возвращает собеседника. """
+        if self.user_id == user_id:
+            return User.query.get(self.recipient_id)
+        return User.query.get(self.user_id)
+
+    def create_message(self, sender_id, recipient_id, body):
+        message = Message(sender_id=sender_id,
+                          recipient_id=recipient_id,
+                          body=body)
+        self.messages.append(message)
+        db.session.commit()
+
+    def get_all_messages(self):
+        if self.messages.count() == 0:
+            return []
+        return self.messages.all()
+    
+    def get_last_100_message(self):
+        if self.messages.count() == 0:
+            return []
+        return self.messages.order_by(Message.timestamp.desc()).limit(100).all()
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(
@@ -106,17 +169,20 @@ class User(db.Model):
     sent_messages = db.relationship('Message',
                                     backref='sender',
                                     lazy='dynamic',
-                                    cascade='all, delete-orphan')
+                                    cascade='all, delete-orphan',
+                                    foreign_keys=[Message.sender_id])
     # Сообщения, полученные данным пользователем
     received_messages = db.relationship('Message',
                                         backref='recipient',
                                         lazy='dynamic',
-                                        cascade='all, delete-orphan')
+                                        cascade='all, delete-orphan',
+                                        foreign_keys=[Message.recipient_id])
     # Чаты, созданные данным пользователем
     created_chats = db.relationship('Chat',
                                     backref='creator',
                                     lazy='dynamic',
-                                    cascade='all, delete')
+                                    cascade='all, delete',
+                                    foreign_keys=[Chat.user_id])
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -134,6 +200,7 @@ class User(db.Model):
         chat = Chat(user_id=self.id, recipient_id=recipient_id)
         db.session.add(chat)
         db.session.commit()
+        return chat
 
     def get_all_chats(self):
         """ Все чаты пользователя """
@@ -401,41 +468,3 @@ class Conspect(db.Model):
         return (cls.query.filter_by(public='on')
                          .order_by(cls.id.desc())
                          .all())
-
-
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    def __repr__(self):
-        return '<Message {}>'.format(self.body)
-    
-    def save(self):
-        if User.query.get(self.sender_id) is None or User.query.get(self.recipient_id) is None:
-            raise Exception("Invalid sender_id or recipient_id")
-        db.session.add(self)
-        db.session.commit()
-
-
-class Chat(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    messages = db.relationship('Message', backref='chat', lazy='dynamic')
-    create_date = db.Column(db.Date(), default=datetime.utcnow)
-
-    def __repr__(self):
-        return '<Chat %r>' % self.id
-
-    def create_message(self, sender_id, recipient_id, body):
-        message = Message(sender_id=sender_id, recipient_id=recipient_id, body=body)
-        self.messages.append(message)
-        db.session.commit()
-
-    def get_all_messages(self):
-        if self.messages.count() == 0:
-            return []
-        return self.messages.all()

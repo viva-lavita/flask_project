@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Чат с пользователем {{ user.username }} 💬
+{% endblock %}
+
+{% block scripts %}
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous">
+</script>
+{% endblock %}
+
+{% block styles %}
+<link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/style_chat.css')}}"
+    />
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<!-- <div id="chat-list" class="col-md-4">
+  <h1>Список чатов</h1>
+</div>
+<div id="room-container" class="col-md-8">
+  <h1 id="home-header">Чат с пользователем {{ user.username }} 💬</h1>
+  <div id="room-subsection">
+    <a href="{{ url_for('app.profile', user_id=user.id ) }}" class="btn btn-outline-success">В профиль пользователя</a>
+  </div>
+
+  <div id="chat-room-widget">
+    <div id="message-list">
+      <ul id="messages"></ul>
+    </div>
+
+    <div id="message-box">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input
+        type="text"
+        placeholder="Введите ваше сообщение"
+        id="message-input"
+        name="message"
+      />
+      <button type="submit" id="send-btn" onclick="sendMessage()">Отправить</button>
+    </div>
+  </div> -->
+  <div class="container">
+    <div class="row clearfix">
+        <div class="col-lg-12">
+            <div class="card chat-app">
+                <div id="plist" class="people-list">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-search"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Search...">
+                    </div>
+                    <ul class="list-unstyled chat-list mt-2 mb-0">
+                        <li class="clearfix">
+                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
+                            <div class="about">
+                                <div class="name">Vincent Porter</div>
+                                <div class="status"> <i class="fa fa-circle offline"></i> left 7 mins ago </div>                                            
+                            </div>
+                        </li>
+                        <li class="clearfix active">
+                            <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                            <div class="about">
+                                <div class="name">Aiden Chavez</div>
+                                <div class="status"> <i class="fa fa-circle online"></i> online </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="chat">
+                    <div class="chat-header clearfix">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                                </a>
+                                <div class="chat-about">
+                                    <h6 class="m-b-0">Aiden Chavez</h6>
+                                    <small>Last seen: 2 hours ago</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 hidden-sm text-right">
+                                <a href="javascript:void(0);" class="btn btn-outline-secondary">
+                                    <i class="fa fa-camera"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-outline-primary">
+                                    <i class="fa fa-image"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-outline-info">
+                                    <i class="fa fa-cogs"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-outline-warning">
+                                    <i class="fa fa-question"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-history">
+                        <ul class="m-b-0">
+                            <li class="clearfix">
+                                <div class="message-data text-right">
+                                    <span class="message-data-time">10:10 AM, Today</span>
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+                                </div>
+                                <div class="message other-message float-right"> Hi Aiden, how are you? How is the project coming along? </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="chat-message clearfix">
+                        <div class="input-group mb-0">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fa fa-send"></i></span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Enter text here...">                                    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+  <script type="text/javascript">
+    var socket = io();
+
+    // Обработчик события для получения нового сообщения
+    socket.on('new_message', function(data) {
+        // Получить данные из события
+        var chatId = data.chat_id;
+        var senderId = data.sender_id;
+        var recipientId = data.recipient_id;
+        var body = data.body;
+
+        // Отобразить новое сообщение в соответствующем чате
+        if (selectedChatId === chatId) {
+            var messageElement = document.createElement('div');
+            messageElement.textContent = body;
+            document.getElementById('chat-history').appendChild(messageElement);
+        }
+    });
+
+    // Обработчик события для получения нового чата
+    socket.on('new_chat', function(data) {
+        // Получить данные из события
+        var chatId = data.chat_id;
+
+        // Создать элемент для отображения нового чата
+        var chatElement = document.createElement('div');
+        chatElement.textContent = 'Chat ID: ' + chatId;
+        chatElement.addEventListener('click', function() {
+            // Обновить список сообщений при выборе чата
+            selectedChatId = chatId;
+            updateMessageList(chatId);
+        });
+
+        // Добавить элемент чата в список чатов
+        document.getElementById('chat-list').appendChild(chatElement);
+    });
+
+    // Функция для обновления списка сообщений для выбранного чата
+    function updateMessageList(chatId) {
+    // Очистить список сообщений
+    document.getElementById('message-list').innerHTML = '';
+
+    // Отправить AJAX-запрос для получения списка сообщений
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/messages/' + chatId, true);
+    // Add the CSRF token to the request headers
+    xhr.setRequestHeader('X-CSRF-Token', document.querySelector('input[name="csrf_token"]').value);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            // Получить ответ от сервера
+            var response = JSON.parse(xhr.responseText);
+
+            // Добавить каждое сообщение в список сообщений
+            response.messages.forEach(function(message) {
+                var messageElement = document.createElement('div');
+                messageElement.textContent = message.body;
+                document.getElementById('message-list').appendChild(messageElement);
+            });
+
+            // Прокрутить список сообщений вниз
+            document.getElementById('message-list').scrollTop = document.getElementById('message-list').scrollHeight;
+        }
+    };
+    xhr.send();
+    }
+
+    // Инициализация
+    var selectedChatId = null;
+    updateMessageList(selectedChatId);
+
+  </script>
+</div>
+{% endblock %}

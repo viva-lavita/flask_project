@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import sys
 import logging
 from logging.handlers import SMTPHandler
@@ -7,13 +8,13 @@ from dotenv import load_dotenv
 from flask import Flask, session
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from flask_wtf import CSRFProtect
 
 sys.path.append('new_config')
-from models import User, Group, Role
+from models import User, Group, Role, Chat, Message as MessageModel
 from views import app
-from views.app_views.chat import rooms
+# from views.app_views.chat import rooms
 from flask_socketio import SocketIO, join_room, leave_room, send
 
 from main import db, login_manager
@@ -47,55 +48,85 @@ mail.init_app(app_main)
 socketio = SocketIO(app_main, async_mode='threading', cors_allowed_origins='*')
 
 
+# @socketio.on('connect')
+# def handle_connect():
+#     name = session.get('name')
+#     room = session.get('room')
+
+#     if name is None or room is None:
+#         return
+#     if room not in rooms:
+#         leave_room(room)
+
+#     join_room(room)
+#     send({
+#         "sender": "",
+#         "message": f"{name} has entered the chat"
+#     }, to=room)
+#     rooms[room]["members"] += 1
+
+
+# @socketio.on('message')
+# def handle_message(payload):
+#     room = session.get('room')
+#     name = session.get('name')
+
+#     if room not in rooms:
+#         return
+
+#     message = {
+#         "sender": name,
+#         "message": payload["message"]
+#     }
+#     send(message, to=room)
+#     rooms[room]["messages"].append(message)
+
+
+# @socketio.on('disconnect')
+# def handle_disconnect():
+#     room = session.get("room")
+#     name = session.get("name")
+#     leave_room(room)
+
+#     if room in rooms:
+#         rooms[room]["members"] -= 1
+#         if rooms[room]["members"] <= 0:
+#             del rooms[room]
+
+#     send({
+#         "message": f"{name} has left the chat",
+#         "sender": ""
+#     }, to=room)
+
+
 @socketio.on('connect')
 def handle_connect():
-    name = session.get('name')
-    room = session.get('room')
+    print('Client connected')
 
-    if name is None or room is None:
-        return
-    if room not in rooms:
-        leave_room(room)
+@socketio.on('new_message')
+def handle_new_message(data):
+    try:
+        chat_id = data['chat_id']
+        sender_id = data['sender_id']
+        recipient_id = data['recipient_id']
+        body = data['body']
 
-    join_room(room)
-    send({
-        "sender": "",
-        "message": f"{name} has entered the chat"
-    }, to=room)
-    rooms[room]["members"] += 1
+        message = MessageModel(chat_id=chat_id,
+                               sender_id=sender_id,
+                               recipient_id=recipient_id,
+                               body=body)
 
-
-@socketio.on('message')
-def handle_message(payload):
-    room = session.get('room')
-    name = session.get('name')
-
-    if room not in rooms:
-        return
-
-    message = {
-        "sender": name,
-        "message": payload["message"]
-    }
-    send(message, to=room)
-    rooms[room]["messages"].append(message)
-
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    room = session.get("room")
-    name = session.get("name")
-    leave_room(room)
-
-    if room in rooms:
-        rooms[room]["members"] -= 1
-        if rooms[room]["members"] <= 0:
-            del rooms[room]
-
-    send({
-        "message": f"{name} has left the chat",
-        "sender": ""
-    }, to=room)
+        current_chat = db.session.get(Chat, chat_id)
+        current_chat.messages.append(message)
+        try:
+            db.session.add(message)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+        data = json.dumps(message.__json__())
+        emit('new_message', data, broadcast=True)
+    except Exception as e:
+        print(e)
 
 
 if not app_main.debug:
