@@ -23,7 +23,7 @@
                 </div>
                 <div>
                   <p class="small text-muted mb-1">Подписчиков</p>
-                  <p class="mb-0">8.5</p>
+                  <p class="mb-0">{{ (item.author.followers).count() }}</p>
                 </div>
               </div>
               {% if current_user.is_authenticated %}

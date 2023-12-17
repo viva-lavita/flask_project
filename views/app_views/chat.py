@@ -71,8 +71,10 @@ from models import User, Chat, Message
 #     )
 
 
-@app.route('<user_id>/chat')
+@app.route("<user_id>/chat")
 def chat(user_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for("app.login"))
     user = User.get_by_id(user_id)
     chats = current_user.get_all_chats()
     current_chat = [chat for chat in chats if
@@ -94,8 +96,10 @@ def chat(user_id):
                 else:
                     user_chat = User.get_by_id(chat.user_id)
                     chat_data[chat.id] = user_chat
-    return render_template('test_chat.html',
+    messages = current_chat.get_last_100_message()
+    return render_template("test_chat.html",
                            user=user,
                            current_chat=current_chat,
                            chat_list=chats,
-                           chat_data=chat_data)
+                           chat_data=chat_data,
+                           messages=messages)

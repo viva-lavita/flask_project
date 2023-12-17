@@ -37,19 +37,19 @@
                         <!-- Обрати внимание, тут добавляется класс актив для выбранного чата -->
                         <li class="clearfix active">
                             <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
-                            <div class="about">
+                            <div class="about user-{{ user.id }}">
                                 <div class="name">{{ user.username }}</div>
                             </div>
                         </li>
                         {% for user_chat in chat_data.values() %}
-                            <a href="{{ url_for('app.chat', user_id=user_chat.id) }}">
                             <li class="clearfix">
+                                <a href="{{ url_for('app.chat', user_id=user_chat.id) }}">
                                 <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
-                                <div class="about">
+                                <div class="about user-{{ user_chat.id }}">
                                     <div class="name">{{ user_chat.username }}</div>
                                 </div>
+                                </a>
                             </li>
-                            </a>
                         {% endfor %}
                     </ul>
                 </div>
@@ -69,7 +69,8 @@
                     <!-- Сюда записываем сообщения. -->
                     <div class="chat-history">
                         <ul class="m-b-0">
-                            {% for message in current_chat.get_last_100_message() %}
+                            {% for message in messages %}
+                                {% if message.sender_id == current_user.id %}
                                 <li class="clearfix">
                                     <div class="message-data text-right">
                                         <span class="message-data-time">{{ message.timestamp.strftime('%Y.%m.%d %H:%M:%S') }}</span>
@@ -77,15 +78,23 @@
                                     </div>
                                     <div class="message other-message float-right">{{ message.body }}</div>
                                 </li>
+                                {% else %}
+                                <li class="clearfix">
+                                    <div class="message-data">
+                                        <span class="message-data-time">{{ message.timestamp.strftime('%Y.%m.%d %H:%M:%S') }}</span>
+                                      </div>
+                                      <div class="message my-message">{{ message.body }}</div> 
+                                </li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                     </div>
                     <div class="chat-message clearfix">
                         <div class="input-group mb-0">
-                            <button class="btn input-group-prepend" type="button" onclick="sendMessage('{{ current_chat.id }}', '{{ current_user.id }}', '{{ user.id }}')">
+                            <div class="input-group-prepend" onclick="sendMessage('{{ current_chat.id }}', '{{ current_user.id }}', '{{ user.id }}')">
                                 <span class="input-group-text"><i class="fa fa-send"></i></span>
-                            </button>
-                            <input type="text" id="message-input" class="form-control" name="message-input" placeholder="Enter text here...">                                    
+                            </div>
+                            <textarea id="message-input" class="form-control" rows="2" name="message-input" placeholder="Enter text here..."></textarea>                                    
                         </div>
                     </div>
                 </div>
@@ -95,66 +104,87 @@
   </div>
 
   <script>
+    // Скролл вниз после загрузки страницы
     window.addEventListener("load", function() {
-    var chatHistory = document.querySelector(".chat-history");
-    chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+        var chatHistory = document.querySelector(".chat-history");
+        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
     });
 
     var socket = io();
 
+    // Тут пока привязан только коннект - дисконнект
+    socket.on("message", function (data) {
+      createChatItem(data);
+      var chatHistory = document.querySelector(".chat-history");
+        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+    });
+
+
     // Обработчик события для получения нового сообщения
     socket.on("new_message", function(data) {
-    try {
+        try {
+            createChatItem(data);
+            var chatHistory = document.querySelector(".chat-history");
+            chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    function createChatItem(data) {
         var jsonData = JSON.parse(data);
         var msg = jsonData.body;
         var time = jsonData.timestamp;
         var msgElement = document.createElement("li");
         msgElement.classList.add("clearfix");
-        msgElement.innerHTML = `
-            <div class="message-data text-right">
-            <span class="message-data-time">${time}</span>
-            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+        if (jsonData.sender_id != "{{ current_user.id }}") {
+            msgElement.innerHTML = `
+            <div class="message-data">
+              <span class="message-data-time">${time}</span>
             </div>
-            <div class="message other-message float-right"> ${msg} </div>
+            <div class="message my-message">${msg}</div> 
         `;
+        } else {
+            msgElement.innerHTML = `
+            <div class="message-data text-right">
+              <span class="message-data-time">${time}</span>
+              <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+            </div>
+            <div class="message other-message float-right">${msg}</div>
+        `;
+        }
         document.querySelector(".chat-history ul").appendChild(msgElement);
-
-        var chatHistory = document.querySelector(".chat-history");
-        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
-    } catch (error) {
-        console.error(error);
-    }
-    });
+        }
 
     // Обработчик события для отправки сообщения при нажатии клафиши Enter
     document.getElementById("message-input").addEventListener("keyup", function(event) {
       if (event.keyCode === 13) {
         event.preventDefault();
-        sendMessage('{{ current_chat.id }}', '{{ current_user.id }}', '{{ user.id }}' );
+        sendMessage("{{ current_chat.id }}", "{{ current_user.id }}", "{{ user.id }}" );
       }
     });
 
     function sendMessage(chatId, senderId, receiverId) {
-    var messageInput = document.getElementById('message-input').value;
-    if (!messageInput) return;
-    var messageData = {
-        chat_id: chatId,
-        sender_id: senderId,
-        recipient_id: receiverId,
-        body: messageInput
-    };
+        var messageInput = document.getElementById('message-input').value;
+        if (!messageInput) return;
+        var messageData = {
+            chat_id: chatId,
+            sender_id: senderId,
+            recipient_id: receiverId,
+            body: messageInput
+        };
 
-    if (!socket.connected) {
-        return;
-    }
-    console.log(messageData);
+        if (!socket.connected) {
+            return;
+        }
+        console.log(messageData);
 
-    try {
-        socket.emit('new_message', messageData);
-        document.getElementById('message-input').value = "";
-    } catch (error) {
-        console.error(error);
+        try {
+            socket.emit('new_message', messageData);
+            document.getElementById('message-input').value = "";
+        } catch (error) {
+            console.error(error);
+        }
     }
-  }
   </script>
 {% endblock %}

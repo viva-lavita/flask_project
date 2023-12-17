@@ -5,10 +5,11 @@ import logging
 from logging.handlers import SMTPHandler
 
 from dotenv import load_dotenv
-from flask import Flask, session
+from flask import Flask, redirect, url_for
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
-from flask_socketio import SocketIO, emit
+from flask_login import current_user
+from flask_socketio import SocketIO, emit, send
 from flask_wtf import CSRFProtect
 
 sys.path.append('new_config')
@@ -98,18 +99,49 @@ socketio = SocketIO(app_main, async_mode='threading', cors_allowed_origins='*')
 #         "sender": ""
 #     }, to=room)
 
+@socketio.on('message')
+def handle_message(data):
+    socketio.emit('message', data, broadcast=True)
+
 
 @socketio.on('connect')
 def handle_connect():
-    print('Client connected')
+    user = current_user
+    try:
+        data = {
+            "sender_id": user.id,
+            "body": "Пользователь {0} в чате".format(user.username),
+            "timestamp": str(datetime.now().strftime('%Y.%m.%d %H:%M:%S')),
+        }
+        data = json.dumps(data)
+        send(data, broadcast=True)
+    except Exception as e:
+        print(e)
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    user = current_user
+    try:
+        data = {
+            "sender_id": user.id,
+            "body": "Пользователь {0} вышел из чата".format(user.username),
+            "timestamp": str(datetime.now().strftime('%Y.%m.%d %H:%M:%S')),
+        }
+        data = json.dumps(data)
+        send(data, broadcast=True)
+        # print("User: {0} disconnected".format(user.username))
+    except Exception as e:
+        print(e)
+
 
 @socketio.on('new_message')
 def handle_new_message(data):
     try:
-        chat_id = data['chat_id']
-        sender_id = data['sender_id']
-        recipient_id = data['recipient_id']
-        body = data['body']
+        chat_id = data["chat_id"]
+        sender_id = data["sender_id"]
+        recipient_id = data["recipient_id"]
+        body = data["body"]
 
         message = MessageModel(chat_id=chat_id,
                                sender_id=sender_id,
@@ -118,13 +150,9 @@ def handle_new_message(data):
 
         current_chat = db.session.get(Chat, chat_id)
         current_chat.messages.append(message)
-        try:
-            db.session.add(message)
-            db.session.commit()
-        except Exception as e:
-            print(e)
+        message.save()
         data = json.dumps(message.__json__())
-        emit('new_message', data, broadcast=True)
+        emit("new_message", data, broadcast=True)
     except Exception as e:
         print(e)
 
@@ -180,18 +208,6 @@ def create_admin():
     db.session.add(user)
     db.session.commit()
     print('Админ создан')
-
-
-# def run_app_main():
-#     with app_main.app_context():
-#         try:
-#             app_main.register_blueprint(app)
-#             db.create_all()
-#             create_admin()
-#             sys.stdout.write('База данных обновлена')
-#         except Exception as e:
-#             sys.stdout.write(f'Ошибка создания БД: {e}')
-#     app_main.run(host='0.0.0.0', port=5000)
 
 
 if __name__ == '__main__':

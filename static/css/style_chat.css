@@ -202,6 +202,10 @@ body{
     float: right
 }
 
+.text-right {
+    text-align: right;
+}
+
 .clearfix:after {
     visibility: hidden;
     display: block;
@@ -255,4 +259,9 @@ body{
         height: calc(100vh - 350px);
         overflow-x: auto
     }
+}
+
+.input-group-append, .input-group-prepend {
+    display: flex;
+    margin-right: -1px;
 }

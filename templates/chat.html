@@ -21,31 +21,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- <div id="chat-list" class="col-md-4">
-  <h1>Список чатов</h1>
-</div>
-<div id="room-container" class="col-md-8">
-  <h1 id="home-header">Чат с пользователем {{ user.username }} 💬</h1>
-  <div id="room-subsection">
-    <a href="{{ url_for('app.profile', user_id=user.id ) }}" class="btn btn-outline-success">В профиль пользователя</a>
-  </div>
-
-  <div id="chat-room-widget">
-    <div id="message-list">
-      <ul id="messages"></ul>
-    </div>
-
-    <div id="message-box">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-      <input
-        type="text"
-        placeholder="Введите ваше сообщение"
-        id="message-input"
-        name="message"
-      />
-      <button type="submit" id="send-btn" onclick="sendMessage()">Отправить</button>
-    </div>
-  </div> -->
   <div class="container">
     <div class="row clearfix">
         <div class="col-lg-12">

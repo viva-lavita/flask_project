@@ -73,7 +73,7 @@ class Message(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
 
     def __repr__(self):
@@ -88,6 +88,10 @@ class Message(db.Model):
             'timestamp': self.timestamp.strftime('%Y.%m.%d %H:%M:%S'),
             'chat_id': self.chat_id
         }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 class Chat(db.Model):
@@ -114,6 +118,7 @@ class Chat(db.Model):
         return User.query.get(self.user_id)
 
     def create_message(self, sender_id, recipient_id, body):
+        """ Создание сообщения этого чата. """
         message = Message(sender_id=sender_id,
                           recipient_id=recipient_id,
                           body=body)
@@ -121,14 +126,18 @@ class Chat(db.Model):
         db.session.commit()
 
     def get_all_messages(self):
+        """ Все сообщения в чате. """
         if self.messages.count() == 0:
             return []
         return self.messages.all()
-    
+
     def get_last_100_message(self):
+        """ Последние 100 сообщений в чате. """
         if self.messages.count() == 0:
             return []
-        return self.messages.order_by(Message.timestamp.desc()).limit(100).all()
+        return self.messages.filter_by(chat_id=self.id).order_by(
+            Message.timestamp.desc()
+        ).limit(100).all()[::-1]
 
 
 class User(db.Model):
