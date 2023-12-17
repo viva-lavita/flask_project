@@ -111,6 +111,14 @@ class Chat(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @classmethod
+    def get_by_id(cls, id_) -> 'Chat':
+        """
+        Кастомный метод запроса объекта модели по id.
+        Model.get_by_id(id)
+        """
+        return cls.query.session.get(cls, id_)
+
     def interlocutor(self, user_id):
         """ Возвращает собеседника. """
         if self.user_id == user_id:
@@ -131,13 +139,13 @@ class Chat(db.Model):
             return []
         return self.messages.all()
 
-    def get_last_100_message(self):
+    def get_last_100_messages(self):
         """ Последние 100 сообщений в чате. """
         if self.messages.count() == 0:
             return []
         return self.messages.filter_by(chat_id=self.id).order_by(
             Message.timestamp.desc()
-        ).limit(100).all()[::-1]
+        ).limit(10).all()[::-1]
 
 
 class User(db.Model):
@@ -217,6 +225,13 @@ class User(db.Model):
             (Chat.user_id == self.id) | (Chat.recipient_id == self.id)
         ).all()
 
+    def get_current_chat(self, recipient_id):
+        """ Текущий чат пользователя """
+        return Chat.query.filter(
+            (Chat.user_id == self.id) & (Chat.recipient_id == recipient_id) | (
+                Chat.user_id == recipient_id) & (Chat.recipient_id == self.id)
+        ).first()
+
     def search_messages(self, keyword):
         """ Поиск сообщений по ключевым словам """
         return Message.query.filter(Message.body.ilike(f"%{keyword}%")).all()
@@ -245,6 +260,7 @@ class User(db.Model):
         return self.id == instance.user_id
 
     def is_followed(self, user):
+        """Подписан ли пользователь на передаваемого аргументом. """
         return self.followed.filter(
             follows.c.followed_id == self.id, follows.c.follower_id == user.id
         ).count() > 0

@@ -29,7 +29,7 @@
                 {% if current_user.is_followed(user) %}
                 <a href="{{ url_for('app.unfollow', user_id=user.id) }}" type="button" class="btn btn-outline-primary">Отписаться</a>
                 {% endif %}
-                <button type="button" class="btn btn-outline-success btn-sm ms-1">Написать Сообщение</button>
+                <a href="{{ url_for('app.chat', user_id=user.id) }}" type="button" class="btn btn-outline-success btn-sm ms-1">Написать Сообщение</a>
               </div>
               {% endif %}
             </div>

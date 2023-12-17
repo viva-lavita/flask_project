@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Чат с пользователем {{ user.username }} 💬
+{% endblock %}
+
+{% block scripts %}
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous">
+</script>
+<script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/action-btn-chat.js')}}"></script>
+{% endblock %}
+
+{% block styles %}
+<link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/style_chat2.css')}}"
+    />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+    <div class="chat-container container-fluid h-100">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-4 col-xl-3 mb-sm-0 chat">
+              <div class="card_users mb-sm-3 mb-md-0 contacts_card">
+                <div class="card-header" style="padding: 10px;">
+                    <div class="input-group">
+                        <input type="text" placeholder="Поиск..." name="" class="form-control search">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Чаты сбоку -->
+                <div class="navbar navbar-expand-md ">
+                    <div class="navbar-toggler chat-toggler" data-bs-toggle="collapse" data-bs-target="#chatCollapse" aria-controls="chatCollapse" aria-expanded="false" aria-label="Chat navigation">
+                        <span class="chat-toggler-icon"></span>
+                    </div>
+                <div class="collapse navbar-collapse" id="chatCollapse">
+                <div class="card-body contacts_body navbar-nav-scroll" style="--bs-scroll-height: 300px;">
+                    <ui class="contacts">
+                    <li class="active_user">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info">
+                                <span>{{ user.username }}</span>
+                                <p>online?</p>
+                            </div>
+                        </div>
+                    </li>
+                    {% for user_chat in chat_data.values() %}
+                    <a href="{{ url_for('app.chat', user_id=user_chat.id) }}" class="chat-action">
+                        <li class="user">
+                            <div class="d-flex bd-highlight">
+                                <div class="img_cont">
+                                    <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img">
+                                    <span class="online_icon offline"></span>
+                                </div>
+                                <div class="user_info">
+                                    <span>{{ user_chat.username }}</span>
+                                    <p>online?Когда?</p>
+                                </div>
+                            </div>
+                        </li>
+                    </a>
+                    {% endfor %}
+                    </ui>
+                </div>
+                <div class="card-footer"></div>
+                </div></div>
+              </div>
+            </div>
+            <!-- Шапка над чатом -->
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card">
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info">
+                                <span>{{ user.username }}</span>
+                                <p>1767 Messages</p>
+                            </div>
+                        </div>
+                        <!-- Боковая менюха три точки -->
+                        <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+                        <div class="action_menu">
+                            <ul>
+                                <a href="{{ url_for('app.profile', user_id=user.id) }}" class="chat-action"><li><i class="fas fa-user-circle"></i>Профиль</li></a>
+                                {% if current_user.is_followed(user) %}
+                                    <a href="{{ url_for('app.unfollow', user_id=user.id)}}" class="chat-action"><li><i class="fas fa-users"></i>Отписаться</li></a>
+                                    {% else %}
+                                    <a href="{{ url_for('app.follow', user_id=user.id)}}" class="chat-action"><li><i class="fas fa-users"></i>Подписаться</li></a>
+                                {% endif %}
+                                <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-search"></i>Поиск</li></a>
+                                <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-plus"></i>Добавить в чат</li></a>
+                                <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-ban"></i>Заблокировать?</li></a>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Сообщения -->
+                    <div class="chat-history card-body msg_card_body">
+                        {% for message in messages %}
+                            {% if message.sender_id != current_user.id %}
+                                <div class="d-flex justify-content-start mb-4">
+                                    <div class="img_cont_msg">
+                                        <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+                                    </div>
+                                    <div class="msg_cotainer">
+                                        {{ message.body }}
+                                        <span class="msg_time">{{ message.timestamp|custom_date }}</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex justify-content-end mb-4">
+                                    <div class="msg_cotainer_send">
+                                        {{ message.body }}
+                                        <span class="msg_time_send" style="white-space: nowrap;">{{ message.timestamp|custom_date }}</span>
+                                    </div>
+                                    <div class="img_cont_msg">
+                                        <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img_msg">
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                            </div>
+                            <textarea name="" id="message-input" class="form-control type_msg" placeholder="Напечатайте сообщение..."></textarea>
+                            <div class="input-group-append" onclick="sendMessage('{{ current_chat.id }}', '{{ current_user.id }}', '{{ user.id }}')">
+                                <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Скролл вниз после загрузки страницы
+    window.addEventListener("load", function() {
+        var chatHistory = document.querySelector(".chat-history");
+        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+    });
+    
+    // const socket = io();
+    const chatId = "{{ current_chat.id }}";
+    const senderId = "{{ current_user.id }}";
+    const recipientId = "{{ user.id }}";
+    var socket = io();
+
+    // Тут пока привязан только коннект - дисконнект
+    socket.on("message", function (data) {
+      createChatItem(data);
+      var chatHistory = document.querySelector(".chat-history");
+        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+    });
+
+
+    // Обработчик события для получения нового сообщения
+    socket.on("new_message", function(data) {
+        try {
+            createChatItem(data);
+            console.log(data);
+            var chatHistory = document.querySelector(".chat-history");
+            chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    function createChatItem(data) {
+        var jsonData = JSON.parse(data);
+        var msg = jsonData.body;
+        var time = jsonData.timestamp;
+        console.log(jsonData);
+        var msgElement = document.createElement("div");
+        if (jsonData.sender_id != "{{ current_user.id }}") {
+            msgElement.classList.add("d-flex", "justify-content-start", "mb-4");
+            msgElement.innerHTML = `<div class="d-flex justify-content-start mb-4">
+                                            <div class="img_cont_msg">
+                                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+                                            </div>
+                                            <div class="msg_cotainer">${msg}
+                                                <span class="msg_time">${new Date(time).toLocaleTimeString()}</span>
+                                            </div>
+                                        </div>`;
+        } else {
+            msgElement.classList.add("d-flex", "justify-content-end", "mb-4");
+            msgElement.innerHTML = `<div class="d-flex justify-content-end mb-4">
+                                            <div class="msg_cotainer_send">${msg}
+                                                <span class="msg_time_send">${new Date(time).toLocaleTimeString()}</span>
+                                            </div>
+                                            <div class="img_cont_msg">
+                                                <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img_msg">
+                                            </div>
+                                        </div>`;
+        }
+        var msgElement = 
+        document.querySelector(".chat-history").appendChild(msgElement);
+        }
+
+    // Обработчик события для отправки сообщения при нажатии клафиши Enter
+    document.getElementById("message-input").addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        var messageInput = document.getElementById("message-input").value;
+        sendMessage(messageInput, chatId, senderId, recipientId);
+      }
+    });
+
+    function sendMessage(messageInput='', chatId, senderId, receiverId) {
+        var messageInput = document.getElementById('message-input').value;
+        if (!messageInput) return;
+        console.log(messageInput);
+        var messageData = {
+            chat_id: chatId,
+            sender_id: senderId,
+            recipient_id: receiverId,
+            body: messageInput
+        };
+
+        if (!socket.connected) {
+            return;
+        }
+
+        try {
+            socket.emit('new_message', messageData);
+            document.getElementById('message-input').value = "";
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    </script>
+{% endblock %}

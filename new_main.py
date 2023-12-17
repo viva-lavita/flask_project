@@ -5,11 +5,11 @@ import logging
 from logging.handlers import SMTPHandler
 
 from dotenv import load_dotenv
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, request, url_for, session
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
 from flask_login import current_user
-from flask_socketio import SocketIO, emit, send
+from flask_socketio import SocketIO, emit, send, join_room, leave_room
 from flask_wtf import CSRFProtect
 
 sys.path.append('new_config')
@@ -48,6 +48,17 @@ mail.init_app(app_main)
 
 socketio = SocketIO(app_main, async_mode='threading', cors_allowed_origins='*')
 
+
+@app_main.template_filter('custom_date')
+def custom_date(timestamp):
+    """ Фильтр для даты в чате """
+    current_date = datetime.now().date()
+    message_date = timestamp.date()
+
+    if message_date == current_date:
+        return timestamp.strftime('%H:%M:%S')
+    else:
+        return timestamp.strftime('%Y.%m.%d %H:%M:%S')
 
 # @socketio.on('connect')
 # def handle_connect():
@@ -99,38 +110,50 @@ socketio = SocketIO(app_main, async_mode='threading', cors_allowed_origins='*')
 #         "sender": ""
 #     }, to=room)
 
+
+def ack():  # может дописать доставленное сообщение, галочки там..?
+    print('message was received!')
+
+
 @socketio.on('message')
 def handle_message(data):
-    socketio.emit('message', data, broadcast=True)
+    chat_id = session.get('chat_id')
+    socketio.emit('message', data, to=chat_id, include_self=True)
 
 
 @socketio.on('connect')
 def handle_connect():
-    user = current_user
+    user_id = current_user.id
+    chat_id = session.get('chat_id')
+    username = session.get('current_username')
+    print('user_id', user_id)
     try:
         data = {
-            "sender_id": user.id,
-            "body": "Пользователь {0} в чате".format(user.username),
+            "sender_id": user_id,
+            "body": "Пользователь {0} в чате".format(username),
             "timestamp": str(datetime.now().strftime('%Y.%m.%d %H:%M:%S')),
         }
         data = json.dumps(data)
-        send(data, broadcast=True)
+        join_room(chat_id)
+        send(data, room=chat_id)
     except Exception as e:
         print(e)
 
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    user = current_user
+    user_id = session.get('current_user_id')
+    chat_id = session.get('chat_id')
+    username = session.get('current_username')
     try:
         data = {
-            "sender_id": user.id,
-            "body": "Пользователь {0} вышел из чата".format(user.username),
+            "sender_id": user_id,
+            "body": "Пользователь {0} вышел из чата".format(username),
             "timestamp": str(datetime.now().strftime('%Y.%m.%d %H:%M:%S')),
         }
         data = json.dumps(data)
-        send(data, broadcast=True)
-        # print("User: {0} disconnected".format(user.username))
+        leave_room(chat_id)
+        send(data, room=chat_id)
     except Exception as e:
         print(e)
 
@@ -138,7 +161,7 @@ def handle_disconnect():
 @socketio.on('new_message')
 def handle_new_message(data):
     try:
-        chat_id = data["chat_id"]
+        chat_id = session.get('chat_id')
         sender_id = data["sender_id"]
         recipient_id = data["recipient_id"]
         body = data["body"]
@@ -152,7 +175,7 @@ def handle_new_message(data):
         current_chat.messages.append(message)
         message.save()
         data = json.dumps(message.__json__())
-        emit("new_message", data, broadcast=True)
+        emit("new_message", data, to=chat_id, callback=ack())
     except Exception as e:
         print(e)
 

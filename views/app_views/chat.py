@@ -1,4 +1,6 @@
-from flask import request, render_template, redirect, url_for, session
+import ast
+import json
+from flask import request, render_template, redirect, url_for, session, flash
 from flask_login import login_required, current_user
 
 from utils.generate_room_code import generate_room_code
@@ -71,7 +73,34 @@ from models import User, Chat, Message
 #     )
 
 
-@app.route("<user_id>/chat")
+# @app.route("chat/<int:chat_id>")
+# def chat2(chat_id):
+#     print('ID чата', chat_id)
+#     if not current_user.is_authenticated:
+#         return redirect(url_for("app.login"))
+#     chat = Chat.get_by_id(chat_id)
+#     if not chat:
+#         flash("Чат не найден", "error")
+#         return redirect(url_for("app.index"))
+#     user_id = session.get('user_id')
+#     user = User.get_by_id(user_id)
+#     print('Пользователь', user)
+#     if not user:
+#         flash("Пользователь не найден", "error")
+#         return redirect(url_for("app.index"))
+#     if user.id != chat.user_id and user.id != chat.recipient_id:
+#         flash("Чат не найден", "error")
+#         return redirect(url_for("app.index"))
+#     chat_data = session.get('chat_data')
+#     messages = chat.get_last_100_messages()
+#     return render_template("chat2.html",
+#                            current_chat=chat,
+#                            user=user,
+#                            chat_data=chat_data,
+#                            messages=messages)
+
+
+@app.route("<int:user_id>/chat>")
 def chat(user_id):
     if not current_user.is_authenticated:
         return redirect(url_for("app.login"))
@@ -96,10 +125,14 @@ def chat(user_id):
                 else:
                     user_chat = User.get_by_id(chat.user_id)
                     chat_data[chat.id] = user_chat
-    messages = current_chat.get_last_100_message()
-    return render_template("test_chat.html",
+    session.clear()
+    # session['user_id'] = user_id
+    session['chat_id'] = current_chat.id
+    session['current_user_id'] = current_user.id
+    session['current_username'] = current_user.username
+    messages = chat.get_last_100_messages()
+    return render_template("chat2.html",
+                           current_chat=chat,
                            user=user,
-                           current_chat=current_chat,
-                           chat_list=chats,
                            chat_data=chat_data,
                            messages=messages)
