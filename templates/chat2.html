@@ -5,11 +5,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
-    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
-    crossorigin="anonymous">
-</script>
 <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/action-btn-chat.js')}}"></script>
 {% endblock %}
@@ -43,34 +38,34 @@
                 <div class="collapse navbar-collapse" id="chatCollapse">
                 <div class="card-body contacts_body navbar-nav-scroll" style="--bs-scroll-height: 300px;">
                     <ui class="contacts">
-                    <li class="active_user">
-                        <div class="d-flex bd-highlight">
-                            <div class="img_cont">
-                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-                                <span class="online_icon"></span>
-                            </div>
-                            <div class="user_info">
-                                <span>{{ user.username }}</span>
-                                <p>online?</p>
-                            </div>
-                        </div>
-                    </li>
-                    {% for user_chat in chat_data.values() %}
-                    <a href="{{ url_for('app.chat', user_id=user_chat.id) }}" class="chat-action">
-                        <li class="user">
+                        <li class="active_user" id="{{ user.id }}">
                             <div class="d-flex bd-highlight">
                                 <div class="img_cont">
-                                    <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img">
-                                    <span class="online_icon offline"></span>
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                                    <span class="online_icon offline" id="tag_online-{{ user.id }}"></span>
                                 </div>
                                 <div class="user_info">
-                                    <span>{{ user_chat.username }}</span>
-                                    <p>online?Когда?</p>
+                                    <span>{{ user.username }}</span>
+                                    <p id="time_online-{{ user.id }}">Offline</p>
                                 </div>
                             </div>
                         </li>
-                    </a>
-                    {% endfor %}
+                        {% for user_chat in chat_data.values() %}
+                            <a href="{{ url_for('app.chat', user_id=user_chat.id) }}" class="chat-action">
+                                <li class="user" id="{{ user_chat.id }}">
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img">
+                                            <span class="online_icon offline" id="tag_online-{{ user_chat.id }}"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>{{ user_chat.username }}</span>
+                                            <p id="time_online-{{ user_chat.id }}">Offline</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </a>
+                        {% endfor %}
                     </ui>
                 </div>
                 <div class="card-footer"></div>
@@ -84,11 +79,9 @@
                         <div class="d-flex bd-highlight">
                             <div class="img_cont">
                                 <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-                                <span class="online_icon"></span>
                             </div>
                             <div class="user_info">
                                 <span>{{ user.username }}</span>
-                                <p>1767 Messages</p>
                             </div>
                         </div>
                         <!-- Боковая менюха три точки -->
@@ -138,8 +131,8 @@
                             <div class="input-group-append">
                                 <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
                             </div>
-                            <textarea name="" id="message-input" class="form-control type_msg" placeholder="Напечатайте сообщение..."></textarea>
-                            <div class="input-group-append" onclick="sendMessage('{{ current_chat.id }}', '{{ current_user.id }}', '{{ user.id }}')">
+                            <textarea name="" id="message-input" class="form-control type_msg" placeholder="Напечатайте сообщение...">{{ users_ids }}</textarea>
+                            <div class="input-group-append" onclick="sendMessage()">
                                 <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
                             </div>
                         </div>
@@ -150,22 +143,76 @@
     </div>
 
     <script>
+    const chatId = "{{ current_chat.id }}";
+    const senderId = "{{ current_user.id }}";
+    const recipientId = "{{ user.id }}";
+
+    socket.emit('join_chat', chatId);
+
     // Скролл вниз после загрузки страницы
     window.addEventListener("load", function() {
         var chatHistory = document.querySelector(".chat-history");
         chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
     });
-    
-    // const socket = io();
-    const chatId = "{{ current_chat.id }}";
-    const senderId = "{{ current_user.id }}";
-    const recipientId = "{{ user.id }}";
-    var socket = io();
+
+    function check_timestamp() {
+        const chatData = "{{ users_ids }}";
+        console.log(chatData);
+        socket.emit("check_timestamp", chatData, chatId);
+    }
+
+    check_timestamp();
+    setInterval(check_timestamp, 20 * 1000);
+
+    socket.on("render_online_tags", function(dataset) {
+        const currentTime = new Date(dataset.current_time);
+        const data = dataset.new_users_ids
+        console.log(data);
+        try {
+            for (let user_id in data) {
+                if (!data[user_id] || data[user_id].trim() === "") {
+                    const elemTagOnline = document.getElementById(`tag_online-${user_id}`);
+                    if (elemTagOnline) {
+                        elemTagOnline.style.backgroundColor = "#9f2828";
+                    }
+                    continue;
+                }
+                const targetTime = new Date(data[user_id]);
+                const elemTagOnline = document.getElementById(`tag_online-${user_id}`);
+                const elemTimeOnline = document.getElementById(`time_online-${user_id}`);
+                // if (!elemTagOnline || !elemTimeOnline) {
+                //     return;
+                // }
+                if (currentTime.getTime() - targetTime.getTime() <= 5 * 60 * 1000) {
+                    elemTagOnline.style.backgroundColor = "#4cd137";
+                    elemTimeOnline.innerHTML = "Online";
+                } else {
+                    let timeDiff = Math.floor((currentTime.getTime() - targetTime.getTime()) / 1000);
+                    let timeLabel = "minutes";
+                    if (timeDiff >= 60 * 60) {
+                        timeDiff = Math.floor(timeDiff / (60 * 60));
+                        timeLabel = "hours";
+                    } else if (timeDiff >= 60) {
+                        timeDiff = Math.floor(timeDiff / 60);
+                    }
+                    elemTagOnline.style.backgroundColor = "#9f2828";
+                    elemTimeOnline.innerHTML = `Offline for ${timeDiff} ${timeLabel}`;
+                }
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+
+    // socket.on("join_room", function(data) {
+    //     console.log(data);
+    // });
 
     // Тут пока привязан только коннект - дисконнект
     socket.on("message", function (data) {
       createChatItem(data);
-      var chatHistory = document.querySelector(".chat-history");
+      const chatHistory = document.querySelector(".chat-history");
         chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
     });
 
@@ -174,8 +221,7 @@
     socket.on("new_message", function(data) {
         try {
             createChatItem(data);
-            console.log(data);
-            var chatHistory = document.querySelector(".chat-history");
+            const chatHistory = document.querySelector(".chat-history");
             chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
         } catch (error) {
             console.error(error);
@@ -183,33 +229,33 @@
     });
 
     function createChatItem(data) {
-        var jsonData = JSON.parse(data);
-        var msg = jsonData.body;
-        var time = jsonData.timestamp;
-        console.log(jsonData);
-        var msgElement = document.createElement("div");
+        const jsonData = JSON.parse(data);
+        const msg = jsonData.body;
+        const time = jsonData.timestamp;
+        // console.log(jsonData);
+        let msgElement = document.createElement("div");
         if (jsonData.sender_id != "{{ current_user.id }}") {
             msgElement.classList.add("d-flex", "justify-content-start", "mb-4");
             msgElement.innerHTML = `<div class="d-flex justify-content-start mb-4">
-                                            <div class="img_cont_msg">
-                                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
-                                            </div>
-                                            <div class="msg_cotainer">${msg}
-                                                <span class="msg_time">${new Date(time).toLocaleTimeString()}</span>
-                                            </div>
-                                        </div>`;
+                                        <div class="img_cont_msg">
+                                            <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+                                        </div>
+                                        <div class="msg_cotainer">${msg}
+                                            <span class="msg_time">${new Date(time).toLocaleTimeString()}</span>
+                                        </div>
+                                    </div>`;
         } else {
             msgElement.classList.add("d-flex", "justify-content-end", "mb-4");
             msgElement.innerHTML = `<div class="d-flex justify-content-end mb-4">
-                                            <div class="msg_cotainer_send">${msg}
-                                                <span class="msg_time_send">${new Date(time).toLocaleTimeString()}</span>
-                                            </div>
-                                            <div class="img_cont_msg">
-                                                <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img_msg">
-                                            </div>
-                                        </div>`;
+                                        <div class="msg_cotainer_send">${msg}
+                                            <span class="msg_time_send">${new Date(time).toLocaleTimeString()}</span>
+                                        </div>
+                                        <div class="img_cont_msg">
+                                            <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img_msg">
+                                        </div>
+                                    </div>`;
         }
-        var msgElement = 
+        var msgHistory = 
         document.querySelector(".chat-history").appendChild(msgElement);
         }
 
@@ -217,20 +263,18 @@
     document.getElementById("message-input").addEventListener("keyup", function(event) {
       if (event.keyCode === 13) {
         event.preventDefault();
-        var messageInput = document.getElementById("message-input").value;
-        sendMessage(messageInput, chatId, senderId, recipientId);
+        sendMessage();
       }
     });
 
-    function sendMessage(messageInput='', chatId, senderId, receiverId) {
+    function sendMessage() {
         var messageInput = document.getElementById('message-input').value;
         if (!messageInput) return;
-        console.log(messageInput);
-        var messageData = {
-            chat_id: chatId,
-            sender_id: senderId,
-            recipient_id: receiverId,
-            body: messageInput
+        const messageData = {
+                chat_id: chatId,
+                sender_id: senderId,
+                recipient_id: recipientId,
+                body: messageInput
         };
 
         if (!socket.connected) {

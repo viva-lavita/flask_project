@@ -1,4 +1,5 @@
 from datetime import datetime
+import html
 import json
 import sys
 import logging
@@ -15,7 +16,6 @@ from flask_wtf import CSRFProtect
 sys.path.append('new_config')
 from models import User, Group, Role, Chat, Message as MessageModel
 from views import app
-# from views.app_views.chat import rooms
 from flask_socketio import SocketIO, join_room, leave_room, send
 
 from main import db, login_manager
@@ -36,7 +36,7 @@ csrf = CSRFProtect()
 csrf.init_app(app_main)
 
 login_manager.init_app(app_main)
-login_manager.login_view = 'login'
+login_manager.login_view = 'app.login'
 login_manager.login_message = "Авторизуйтесь для доступа к закрытым страницам"
 login_manager.login_message_category = "success"
 
@@ -60,56 +60,6 @@ def custom_date(timestamp):
     else:
         return timestamp.strftime('%Y.%m.%d %H:%M:%S')
 
-# @socketio.on('connect')
-# def handle_connect():
-#     name = session.get('name')
-#     room = session.get('room')
-
-#     if name is None or room is None:
-#         return
-#     if room not in rooms:
-#         leave_room(room)
-
-#     join_room(room)
-#     send({
-#         "sender": "",
-#         "message": f"{name} has entered the chat"
-#     }, to=room)
-#     rooms[room]["members"] += 1
-
-
-# @socketio.on('message')
-# def handle_message(payload):
-#     room = session.get('room')
-#     name = session.get('name')
-
-#     if room not in rooms:
-#         return
-
-#     message = {
-#         "sender": name,
-#         "message": payload["message"]
-#     }
-#     send(message, to=room)
-#     rooms[room]["messages"].append(message)
-
-
-# @socketio.on('disconnect')
-# def handle_disconnect():
-#     room = session.get("room")
-#     name = session.get("name")
-#     leave_room(room)
-
-#     if room in rooms:
-#         rooms[room]["members"] -= 1
-#         if rooms[room]["members"] <= 0:
-#             del rooms[room]
-
-#     send({
-#         "message": f"{name} has left the chat",
-#         "sender": ""
-#     }, to=room)
-
 
 def ack():  # может дописать доставленное сообщение, галочки там..?
     print('message was received!')
@@ -117,16 +67,35 @@ def ack():  # может дописать доставленное сообще�
 
 @socketio.on('message')
 def handle_message(data):
-    chat_id = session.get('chat_id')
+    chat_id = data.get('chat_id')
+    if not chat_id:
+        return
     socketio.emit('message', data, to=chat_id, include_self=True)
 
 
-@socketio.on('connect')
-def handle_connect():
+# @socketio.on('connect')
+# def handle_connect():
+#     user_id = current_user.id
+#     chat_id = session.get('chat_id')
+#     username = session.get('current_username')
+#     try:
+#         data = {
+#             "sender_id": user_id,
+#             "body": "Пользователь {0} в чате".format(username),
+#             "timestamp": str(datetime.now().strftime('%Y.%m.%d %H:%M:%S')),
+#         }
+#         data = json.dumps(data)
+#         join_room(chat_id)
+#         send(data, room=chat_id)
+#     except Exception as e:
+#         print(e)
+
+
+@socketio.on('join_chat')
+def handle_join_room(chat_id):
     user_id = current_user.id
-    chat_id = session.get('chat_id')
-    username = session.get('current_username')
-    print('user_id', user_id)
+    chat_id = int(chat_id)
+    username = current_user.username
     try:
         data = {
             "sender_id": user_id,
@@ -140,11 +109,12 @@ def handle_connect():
         print(e)
 
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    user_id = session.get('current_user_id')
-    chat_id = session.get('chat_id')
-    username = session.get('current_username')
+@socketio.on('leave_chat')
+def handle_leave_room(chat_id):
+    print('СЮДА ЗАШЛИ!Ы')
+    user_id = current_user.id
+    chat_id = int(chat_id)
+    username = current_user.username
     try:
         data = {
             "sender_id": user_id,
@@ -153,13 +123,26 @@ def handle_disconnect():
         }
         data = json.dumps(data)
         leave_room(chat_id)
-        send(data, room=chat_id)
+        send(data, to=chat_id)
     except Exception as e:
         print(e)
 
 
+@socketio.on('disconnect')
+def handle_disconnect():
+    chat_id = session.get('chat_id')
+    print('СЮДА ЗАШЛИ!Ы 1', chat_id)
+    if chat_id is None:
+        return print('Пользователь вышел из чата', session.get('chat_id'))
+    chat_id = int(chat_id)
+    # username = session.get('current_username')
+    session['chat_id'] = 0
+    print('СЮДА ЗАШЛИ!Ы 2', session.get('chat_id'))
+    handle_leave_room(chat_id)
+
+
 @socketio.on('new_message')
-def handle_new_message(data):
+def handle_new_message(data: dict):
     try:
         chat_id = session.get('chat_id')
         sender_id = data["sender_id"]
@@ -174,10 +157,46 @@ def handle_new_message(data):
         current_chat = db.session.get(Chat, chat_id)
         current_chat.messages.append(message)
         message.save()
+        print(message)
         data = json.dumps(message.__json__())
         emit("new_message", data, to=chat_id, callback=ack())
     except Exception as e:
         print(e)
+
+
+# Хранит идентификаторы пользователей и время их последнего онлайного статуса
+TAG_ONLINE_STORAGE = {}
+
+
+def filling_online_storage():
+    """Заполняет хранилище онлайн статусов."""
+    if TAG_ONLINE_STORAGE:
+        return
+    for user in User.query.all():
+        TAG_ONLINE_STORAGE[user.id] = ''
+
+
+@socketio.on('online')
+def handle_online(data):
+    TAG_ONLINE_STORAGE[current_user.id] = data['timestamp']
+
+
+@socketio.on('check_timestamp')
+def handle_chack_online(users_ids, chat_id) -> None:
+    # room = int(chat_id)
+    users_ids = json.loads(html.unescape(users_ids))
+    new_users_ids = {}
+    for user_id in users_ids:
+        new_users_ids[int(user_id)] = TAG_ONLINE_STORAGE.get(int(user_id), '')
+    sender_sid = request.sid
+    current_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
+    data_to_emit = {
+        'new_users_ids': new_users_ids,
+        'current_time': current_time
+    }
+    socketio.emit('render_online_tags',
+                  data_to_emit,
+                  to=sender_sid)
 
 
 if not app_main.debug:
@@ -240,6 +259,7 @@ if __name__ == '__main__':
             # app_main.register_blueprint(socketio)
             db.create_all()
             create_admin()
+            filling_online_storage()
             sys.stdout.write('База данных обновлена')
         except Exception as e:
             sys.stdout.write(f'Ошибка создания БД: + {e}')

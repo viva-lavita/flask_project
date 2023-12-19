@@ -99,40 +99,44 @@ from models import User, Chat, Message
 #                            chat_data=chat_data,
 #                            messages=messages)
 
-
 @app.route("<int:user_id>/chat>")
+@login_required
 def chat(user_id):
     if not current_user.is_authenticated:
         return redirect(url_for("app.login"))
     user = User.get_by_id(user_id)
     chats = current_user.get_all_chats()
-    current_chat = [chat for chat in chats if
-                    chat.recipient_id == user.id and
-                    chat.user_id == current_user.id or
-                    chat.user_id == user.id and
-                    chat.recipient_id == current_user.id]
-    if len(current_chat) > 0:
-        current_chat = current_chat[0]
+    current_chat_list = [chat for chat in chats if
+                         chat.recipient_id == user.id and
+                         chat.user_id == current_user.id or
+                         chat.user_id == user.id and
+                         chat.recipient_id == current_user.id]
+    if len(current_chat_list) > 0:
+        current_chat = current_chat_list[0]
     else:
         current_chat = current_user.create_chat(user_id)
     chat_data = {}
+    users_ids = {user.id: user.id}
     if chats:
         for chat in chats:
             if chat.id != current_chat.id:
                 if chat.recipient_id != current_user.id:
-                    user_chat = User.get_by_id(chat.recipient_id)
-                    chat_data[chat.id] = user_chat
+                    recipient_user = User.get_by_id(chat.recipient_id)
+                    users_ids[recipient_user.id] = recipient_user.id
+                    chat_data[recipient_user.id] = recipient_user
                 else:
-                    user_chat = User.get_by_id(chat.user_id)
-                    chat_data[chat.id] = user_chat
+                    recipient_user = User.get_by_id(chat.user_id)
+                    users_ids[recipient_user.id] = recipient_user.id
+                    chat_data[recipient_user.id] = recipient_user
     session.clear()
-    # session['user_id'] = user_id
     session['chat_id'] = current_chat.id
     session['current_user_id'] = current_user.id
     session['current_username'] = current_user.username
-    messages = chat.get_last_100_messages()
+    messages = current_chat.get_last_100_messages()
+    users_ids_json = json.dumps(users_ids)
     return render_template("chat2.html",
-                           current_chat=chat,
+                           current_chat=current_chat,
                            user=user,
                            chat_data=chat_data,
-                           messages=messages)
+                           messages=messages,
+                           users_ids=users_ids_json)

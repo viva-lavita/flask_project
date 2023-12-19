@@ -98,10 +98,11 @@ class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    messages = db.relationship(
-        'Message', backref='chat', lazy='dynamic',
-        primaryjoin="or_(Chat.id==Message.sender_id, Chat.id==Message.recipient_id, Chat.id==Message.chat_id)"
-    )
+    messages = db.relationship('Message',
+                               backref='chat',
+                               lazy='dynamic',
+                               primaryjoin="Chat.id==Message.chat_id"
+                               )
     create_date = db.Column(db.Date(), default=datetime.utcnow)
 
     def __repr__(self):
@@ -145,7 +146,7 @@ class Chat(db.Model):
             return []
         return self.messages.filter_by(chat_id=self.id).order_by(
             Message.timestamp.desc()
-        ).limit(10).all()[::-1]
+        ).limit(10)[::-1]
 
 
 class User(db.Model):
