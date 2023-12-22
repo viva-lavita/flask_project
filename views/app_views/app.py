@@ -3,7 +3,7 @@ from flask import (
     send_from_directory, url_for)
 from werkzeug.utils import secure_filename
 
-from main import db
+from models import db
 from views import app
 # from config import cache
 

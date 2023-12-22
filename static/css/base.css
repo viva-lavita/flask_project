@@ -162,5 +162,76 @@ body {
   position: absolute;
   visibility: visible;
   z-index: 9999;
-  width: 750px;
+  /* width: 750px; */
 }
+
+#message-icon {
+  position: fixed;
+  padding: 15px;
+  margin-top: auto;
+  right: 2%;
+  color: rgb(217, 117, 24);
+  z-index: 9999;
+  animation: shake 1s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px) rotate(-5deg); }
+  50% { transform: translateX(5px) rotate(5deg); }
+  75% { transform: translateX(-5px) rotate(-5deg); }
+  100% { transform: translateX(0) rotate(0); }
+}
+
+.hidden {
+  display: none;
+}
+
+.chat_widget {
+  position: absolute;
+  display: none;
+  width: auto;
+  height: auto;
+  right: 0;
+  left: auto;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.msg_icon_widget {
+  margin-top: auto;
+  margin-bottom: 2em;
+  margin-left: 1em;
+  margin-right: 1.5em;
+  color: rgb(250, 214, 70);
+}
+
+.chat-action {
+  text-decoration: none;
+  /* color: white; */
+}
+
+.user_info_widget {
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 15px;
+}
+
+.user_widget:hover {
+  background-color: rgba(0,0,0,0.3);
+}
+
+.user_img_widget {
+  height: 60px;
+  margin: 10px;
+  width: 60px;
+  border:1.5px solid #f5f6fa;
+  box-sizing: border-box;
+}
+
+.contacts_widget {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+

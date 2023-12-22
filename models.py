@@ -2,10 +2,15 @@ from datetime import datetime
 
 # from flask_login import LoginManager
 # from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from main import db, login_manager
+# from main import db, login_manager
 
+
+db = SQLAlchemy()
+login_manager = LoginManager()
 
 
 @login_manager.user_loader
@@ -75,6 +80,7 @@ class Message(db.Model):
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
+    is_read = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return '<Message {}>'.format(self.body)

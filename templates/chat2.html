@@ -35,106 +35,107 @@
                     <div class="navbar-toggler chat-toggler" data-bs-toggle="collapse" data-bs-target="#chatCollapse" aria-controls="chatCollapse" aria-expanded="false" aria-label="Chat navigation">
                         <span class="chat-toggler-icon"></span>
                     </div>
-                <div class="collapse navbar-collapse" id="chatCollapse">
-                <div class="card-body contacts_body navbar-nav-scroll" style="--bs-scroll-height: 300px;">
-                    <ui class="contacts">
-                        <li class="active_user" id="{{ user.id }}">
-                            <div class="d-flex bd-highlight">
-                                <div class="img_cont">
-                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-                                    <span class="online_icon offline" id="tag_online-{{ user.id }}"></span>
-                                </div>
-                                <div class="user_info">
-                                    <span>{{ user.username }}</span>
-                                    <p id="time_online-{{ user.id }}">Offline</p>
-                                </div>
-                            </div>
-                        </li>
-                        {% for user_chat in chat_data.values() %}
-                            <a href="{{ url_for('app.chat', user_id=user_chat.id) }}" class="chat-action">
-                                <li class="user" id="{{ user_chat.id }}">
-                                    <div class="d-flex bd-highlight">
+                    <div class="collapse navbar-collapse" id="chatCollapse">
+                        <div class="card-body contacts_body navbar-nav-scroll" style="--bs-scroll-height: 300px;">
+                            <ui class="contacts">
+                                <li class="active_user" id="{{ user.id }}">
+                                    <div class="d-flex">
                                         <div class="img_cont">
-                                            <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img">
-                                            <span class="online_icon offline" id="tag_online-{{ user_chat.id }}"></span>
+                                            <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                                            <span class="online_icon offline" id="tag_online-{{ user.id }}"></span>
                                         </div>
                                         <div class="user_info">
-                                            <span>{{ user_chat.username }}</span>
-                                            <p id="time_online-{{ user_chat.id }}">Offline</p>
+                                            <span>{{ user.username }}</span>
+                                            <p id="time_online-{{ user.id }}">Offline</p>
                                         </div>
                                     </div>
                                 </li>
-                            </a>
-                        {% endfor %}
-                    </ui>
+                                {% for chat_id, user_chat in chat_data.items() %}
+                                    <a href="{{ url_for('app.chat', user_id=user_chat.id) }}" class="chat-action">
+                                        <li class="user" id="{{ user_chat.id }}">
+                                            <div class="d-flex">
+                                                <div class="img_cont">
+                                                    <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img">
+                                                    <span class="online_icon offline" id="tag_online-{{ user_chat.id }}"></span>
+                                                </div>
+                                                <div class="user_info">
+                                                    <span>{{ user_chat.username }}</span>
+                                                    <p id="time_online-{{ user_chat.id }}">Offline</p>
+                                                </div>
+                                                <div class="msg_icon" id="msg_icon-{{ chat_id }}"></div>
+                                            </div>
+                                        </li>
+                                    </a>
+                                {% endfor %}
+                            </ui>
+                        </div>
+                        <div class="card-footer"></div>
+                    </div>
                 </div>
-                <div class="card-footer"></div>
-                </div></div>
-              </div>
             </div>
-            <!-- Шапка над чатом -->
-            <div class="col-md-8 col-xl-6 chat">
-                <div class="card">
-                    <div class="card-header msg_head">
-                        <div class="d-flex bd-highlight">
-                            <div class="img_cont">
-                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-                            </div>
-                            <div class="user_info">
-                                <span>{{ user.username }}</span>
-                            </div>
+        </div>
+        <!-- Шапка над чатом -->
+        <div class="col-md-8 col-xl-6 chat">
+            <div class="card">
+                <div class="card-header msg_head">
+                    <div class="d-flex">
+                        <div class="img_cont">
+                            <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
                         </div>
-                        <!-- Боковая менюха три точки -->
-                        <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
-                        <div class="action_menu">
-                            <ul>
-                                <a href="{{ url_for('app.profile', user_id=user.id) }}" class="chat-action"><li><i class="fas fa-user-circle"></i>Профиль</li></a>
-                                {% if current_user.is_followed(user) %}
-                                    <a href="{{ url_for('app.unfollow', user_id=user.id)}}" class="chat-action"><li><i class="fas fa-users"></i>Отписаться</li></a>
-                                    {% else %}
-                                    <a href="{{ url_for('app.follow', user_id=user.id)}}" class="chat-action"><li><i class="fas fa-users"></i>Подписаться</li></a>
-                                {% endif %}
-                                <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-search"></i>Поиск</li></a>
-                                <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-plus"></i>Добавить в чат</li></a>
-                                <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-ban"></i>Заблокировать?</li></a>
-                            </ul>
+                        <div class="user_info">
+                            <span>{{ user.username }}</span>
                         </div>
                     </div>
-                    <!-- Сообщения -->
-                    <div class="chat-history card-body msg_card_body">
-                        {% for message in messages %}
-                            {% if message.sender_id != current_user.id %}
-                                <div class="d-flex justify-content-start mb-4">
-                                    <div class="img_cont_msg">
-                                        <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
-                                    </div>
-                                    <div class="msg_cotainer">
-                                        {{ message.body }}
-                                        <span class="msg_time">{{ message.timestamp|custom_date }}</span>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <div class="d-flex justify-content-end mb-4">
-                                    <div class="msg_cotainer_send">
-                                        {{ message.body }}
-                                        <span class="msg_time_send" style="white-space: nowrap;">{{ message.timestamp|custom_date }}</span>
-                                    </div>
-                                    <div class="img_cont_msg">
-                                        <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img_msg">
-                                    </div>
-                                </div>
+                    <!-- Боковая менюха три точки -->
+                    <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+                    <div class="action_menu">
+                        <ul>
+                            <a href="{{ url_for('app.profile', user_id=user.id) }}" class="chat-action"><li><i class="fas fa-user-circle"></i>Профиль</li></a>
+                            {% if current_user.is_followed(user) %}
+                                <a href="{{ url_for('app.unfollow', user_id=user.id)}}" class="chat-action"><li><i class="fas fa-users"></i>Отписаться</li></a>
+                                {% else %}
+                                <a href="{{ url_for('app.follow', user_id=user.id)}}" class="chat-action"><li><i class="fas fa-users"></i>Подписаться</li></a>
                             {% endif %}
-                        {% endfor %}
+                            <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-search"></i>Поиск</li></a>
+                            <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-plus"></i>Добавить в чат</li></a>
+                            <a href="{{ url_for('app.conditions') }}" class="chat-action"><li><i class="fas fa-ban"></i>Заблокировать?</li></a>
+                        </ul>
                     </div>
-                    <div class="card-footer">
-                        <div class="input-group">
-                            <div class="input-group-append">
-                                <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                </div>
+                <!-- Сообщения -->
+                <div class="chat-history card-body msg_card_body">
+                    {% for message in messages %}
+                        {% if message.sender_id != current_user.id %}
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_cotainer">
+                                    {{ message.body }}
+                                    <span class="msg_time">{{ message.timestamp|custom_date }}</span>
+                                </div>
                             </div>
-                            <textarea name="" id="message-input" class="form-control type_msg" placeholder="Напечатайте сообщение...">{{ users_ids }}</textarea>
-                            <div class="input-group-append" onclick="sendMessage()">
-                                <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+                        {% else %}
+                            <div class="d-flex justify-content-end mb-4">
+                                <div class="msg_cotainer_send">
+                                    {{ message.body }}
+                                    <span class="msg_time_send" style="white-space: nowrap;">{{ message.timestamp|custom_date }}</span>
+                                </div>
+                                <div class="img_cont_msg">
+                                    <img src="{{ url_for('static', filename='img/contact/7.jpg') }}" class="rounded-circle user_img_msg">
+                                </div>
                             </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <div class="input-group-append">
+                            <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                        </div>
+                        <textarea name="" id="message-input" class="form-control type_msg" placeholder="Напечатайте сообщение...">{{ unread_chats_ids }}</textarea>
+                        <div class="input-group-append" onclick="sendMessage()">
+                            <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
                         </div>
                     </div>
                 </div>
@@ -147,7 +148,9 @@
     const senderId = "{{ current_user.id }}";
     const recipientId = "{{ user.id }}";
 
+
     socket.emit('join_chat', chatId);
+
 
     // Скролл вниз после загрузки страницы
     window.addEventListener("load", function() {
@@ -155,19 +158,55 @@
         chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
     });
 
+    // Пачка запросов инициализации проверки состояний чата 
+    // 1. Отправка сокету списка текущих чатов (за вычетом активного) для получения в ответ времени, когда пользователи были онлайн
+    // 2. Отправка сокету сообщения, что текущий польователь онлайн (для обновления времени)
+    // 3. Запуск AJAX-запроса на получение меток непрочитанных сообщений
     function check_timestamp() {
         const chatData = "{{ users_ids }}";
-        console.log(chatData);
-        socket.emit("check_timestamp", chatData, chatId);
+        socket.emit("check_timestamp", chatData);
+        socket.emit('online', { 'timestamp': formatDate(new Date()) });
+        // socket.emit('check_unread_messages', chatId);
+        checkUnreadMessages();
     }
 
+
+    function checkUnreadMessages() {
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", "/check_unread_messages_api/" + chatId);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                renderIconUnreadMessages(xhr.responseText);
+            }
+        };
+        xhr.send();
+    }
+
+
+    function renderIconUnreadMessages(unreadChatsIds) {
+        const chatIdsArray = JSON.parse(unreadChatsIds);
+        for (const chatId of chatIdsArray) {
+            const elemChat = document.getElementById(`msg_icon-${chatId}`);
+            const iconUnread = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="25" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/>
+                </svg>
+            `
+            if (elemChat) {
+                elemChat.innerHTML = iconUnread;
+            }
+        }
+    }
+
+
     check_timestamp();
+    renderIconUnreadMessages("{{ unread_chats_ids }}");
     setInterval(check_timestamp, 20 * 1000);
+
 
     socket.on("render_online_tags", function(dataset) {
         const currentTime = new Date(dataset.current_time);
         const data = dataset.new_users_ids
-        console.log(data);
         try {
             for (let user_id in data) {
                 if (!data[user_id] || data[user_id].trim() === "") {
@@ -205,10 +244,6 @@
     });
 
 
-    // socket.on("join_room", function(data) {
-    //     console.log(data);
-    // });
-
     // Тут пока привязан только коннект - дисконнект
     socket.on("message", function (data) {
       createChatItem(data);
@@ -227,6 +262,7 @@
             console.error(error);
         }
     });
+
 
     function createChatItem(data) {
         const jsonData = JSON.parse(data);
@@ -255,7 +291,6 @@
                                         </div>
                                     </div>`;
         }
-        var msgHistory = 
         document.querySelector(".chat-history").appendChild(msgElement);
         }
 
@@ -266,6 +301,7 @@
         sendMessage();
       }
     });
+
 
     function sendMessage() {
         var messageInput = document.getElementById('message-input').value;

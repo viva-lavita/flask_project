@@ -2,7 +2,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
 from .views.views_app import DashBordView, HomeView
-from new_main import app, db
+from main import app, db
 from models import User, Note, File, Conspect, Group, Role
 
 

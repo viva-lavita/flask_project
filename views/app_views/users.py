@@ -4,7 +4,7 @@ import logging
 
 from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, login_user, logout_user, current_user
-from new_main import mail, Message
+from main import mail, Message, TAG_ONLINE_STORAGE
 
 from .app import app, db
 from models import Conspect, Note, User
@@ -68,7 +68,8 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-            # flash('Пользователь успешно добавлен', 'success')
+            TAG_ONLINE_STORAGE[user.id] = ''
+            flash('Пользователь успешно зарегистрирован', 'success')
             return redirect(url_for('app.login'))
         except Exception as e:
             print(e)
