@@ -1,0 +1,33 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Редактировать профиль</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="{{ url_for('app.edit_profile') }}">
+        <div class="modal-body">
+            {{ form.csrf_token }}
+            {{ form.hidden_tag() }}
+            
+            {% for field in form if field.name != 'csrf_token' %}
+                <div class="mb-3">
+                    {{ field(class="form-control", placeholder=field.label.text, value=field.data.value) }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>

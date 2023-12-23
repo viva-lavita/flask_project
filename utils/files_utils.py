@@ -4,8 +4,10 @@ from typing import Optional
 
 import markdown
 
-from config import app, db
-from models import File, Note, Conspect
+# from main import db
+from main import app_main as app
+# from views.app_views.app import app
+from models import db, File, Note, Conspect
 
 
 def allowed_file(filename: str) -> bool:

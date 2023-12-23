@@ -28,7 +28,7 @@
     {% endif %}
     <div class="card-body">
       <p class="card-text">{{ markdown|safe }}</p>
-      <p><b>Автор: {{ item.author.username }}</b></p>
+      <p><b>Автор: {{ item.author.username | truncate(30) }}</b></p>
       <note class="date">Загружен: {{ item.add_date }}</note>
     </div>
     <div class="b-example-divider" style="width: 100%;"></div>

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  {% if request.endpoint == 'confirmation_conspect' %}
+  {% if request.endpoint == 'app.confirmation_conspect' %}
     Подтверждение удаления конспекта {{ conspect.name }}
   {% else %}
     Удаление {{ note.title }}
@@ -11,7 +11,7 @@
 {% block content %}
 
   <div class="container mt-5" style="width: 500px;">
-    {% if request.endpoint == 'confirmation_conspect' %}
+    {% if request.endpoint == 'app.confirmation_conspect' %}
       <h1>Подтверждение удаления</h1>
       <p>Вы действительно хотите удалить конспект "{{ conspect.name }}"?</p>
       <a href="/conspects/{{ conspect.id }}/delete" class="btn btn-danger">Удалить</a>

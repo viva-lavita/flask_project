@@ -1,9 +1,16 @@
 from datetime import datetime
 
-# from flask_login import LoginManager, UserMixin
+# from flask_login import LoginManager
+# from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from config import db, login_manager
+# from main import db, login_manager
+
+
+db = SQLAlchemy()
+login_manager = LoginManager()
 
 
 @login_manager.user_loader
@@ -49,6 +56,105 @@ class Group(db.Model):
         return self.name
 
 
+follows = db.Table(
+    'follows',
+    db.Column(
+        'follower_id',
+        db.Integer,
+        db.ForeignKey('user.id'),
+        primary_key=True
+    ),
+    db.Column(
+        'followed_id',
+        db.Integer,
+        db.ForeignKey('user.id'),
+        primary_key=True
+    )
+)
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), index=True)
+    is_read = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.body)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'sender_id': self.sender_id,
+            'recipient_id': self.recipient_id,
+            'body': self.body,
+            'timestamp': self.timestamp.strftime('%Y.%m.%d %H:%M:%S'),
+            'chat_id': self.chat_id
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    messages = db.relationship('Message',
+                               backref='chat',
+                               lazy='dynamic',
+                               primaryjoin="Chat.id==Message.chat_id"
+                               )
+    create_date = db.Column(db.Date(), default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Chat %r>' % self.id
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def get_by_id(cls, id_) -> 'Chat':
+        """
+        Кастомный метод запроса объекта модели по id.
+        Model.get_by_id(id)
+        """
+        return cls.query.session.get(cls, id_)
+
+    def interlocutor(self, user_id):
+        """ Возвращает собеседника. """
+        if self.user_id == user_id:
+            return User.query.get(self.recipient_id)
+        return User.query.get(self.user_id)
+
+    def create_message(self, sender_id, recipient_id, body):
+        """ Создание сообщения этого чата. """
+        message = Message(sender_id=sender_id,
+                          recipient_id=recipient_id,
+                          body=body)
+        self.messages.append(message)
+        db.session.commit()
+
+    def get_all_messages(self):
+        """ Все сообщения в чате. """
+        if self.messages.count() == 0:
+            return []
+        return self.messages.all()
+
+    def get_last_100_messages(self):
+        """ Последние 100 сообщений в чате. """
+        if self.messages.count() == 0:
+            return []
+        return self.messages.filter_by(chat_id=self.id).order_by(
+            Message.timestamp.desc()
+        ).limit(10)[::-1]
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(
@@ -60,8 +166,6 @@ class User(db.Model):
                             backref='author',
                             lazy='dynamic',
                             cascade='all, delete')
-    # roles = db.relationship('Role', secondary=roles_users,
-    #                         backref=db.backref('users', lazy='dynamic'))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -79,6 +183,30 @@ class User(db.Model):
     profession = db.Column(db.String(100))
     site = db.Column(db.String(100))
     github = db.Column(db.String(100))
+    followers = db.relationship('User',
+                                secondary='follows',
+                                primaryjoin=(follows.c.follower_id == id),
+                                secondaryjoin=(follows.c.followed_id == id),
+                                backref=db.backref('followed', lazy='dynamic'),
+                                lazy='dynamic')
+    # Сообщения, отправленные данным пользователем
+    sent_messages = db.relationship('Message',
+                                    backref='sender',
+                                    lazy='dynamic',
+                                    cascade='all, delete-orphan',
+                                    foreign_keys=[Message.sender_id])
+    # Сообщения, полученные данным пользователем
+    received_messages = db.relationship('Message',
+                                        backref='recipient',
+                                        lazy='dynamic',
+                                        cascade='all, delete-orphan',
+                                        foreign_keys=[Message.recipient_id])
+    # Чаты, созданные данным пользователем
+    created_chats = db.relationship('Chat',
+                                    backref='creator',
+                                    lazy='dynamic',
+                                    cascade='all, delete',
+                                    foreign_keys=[Chat.user_id])
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -90,6 +218,37 @@ class User(db.Model):
     def check_password(self,  password):
         """ Проверка пароля """
         return check_password_hash(self.password_hash, password)
+
+    def create_chat(self, recipient_id):
+        """ Создание чата """
+        chat = Chat(user_id=self.id, recipient_id=recipient_id)
+        db.session.add(chat)
+        db.session.commit()
+        return chat
+
+    def get_all_chats(self):
+        """ Все чаты пользователя """
+        return Chat.query.filter(
+            (Chat.user_id == self.id) | (Chat.recipient_id == self.id)
+        ).all()
+
+    def get_current_chat(self, recipient_id):
+        """ Текущий чат пользователя """
+        return Chat.query.filter(
+            (Chat.user_id == self.id) & (Chat.recipient_id == recipient_id) | (
+                Chat.user_id == recipient_id) & (Chat.recipient_id == self.id)
+        ).first()
+
+    def search_messages(self, keyword):
+        """ Поиск сообщений по ключевым словам """
+        return Message.query.filter(Message.body.ilike(f"%{keyword}%")).all()
+
+    def search_chats(self, keyword):
+        """ Поиск чатов по ключевым словам """
+        return Chat.query.filter(
+            (Chat.user_id == self.id) | (Chat.recipient_id == self.id)).filter(
+                Chat.messages.any(Message.body.ilike(f"%{keyword}%"))
+            ).all()
 
     def is_favorite(self, note) -> bool:
         """Проверяет, является ли заметка избранной."""
@@ -106,6 +265,15 @@ class User(db.Model):
     def is_author(self, instance):
         """ Проверка на авторство. """
         return self.id == instance.user_id
+
+    def is_followed(self, user):
+        """Подписан ли пользователь на передаваемого аргументом. """
+        return self.followed.filter(
+            follows.c.followed_id == self.id, follows.c.follower_id == user.id
+        ).count() > 0
+
+    def followed_list(self):
+        return self.followed.filter(follows.c.followed_id == self.id).all()
 
     @property
     def is_authenticated(self):
@@ -130,15 +298,12 @@ class User(db.Model):
     def has_role(self, role):
         if isinstance(role, str):
             role = Role.query.filter_by(name=role.lower()).first()
-        #
         if not role:
             return False
-        #
         return role in self.roles
 
     def has_roles(self, *roles_seq):
         def _has_one_role(*_roles):
-            # checks if the user has at least one role of many (OR Gate)
             for _role in _roles:
                 if self.has_role(_role):
                     return True

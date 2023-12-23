@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Чат с пользователем {{ user.username }} 💬
+{% endblock %}
+
+{% block scripts %}
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous">
+</script>
+{% endblock %}
+
+{% block styles %}
+<link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/style_chat.css')}}"
+    />
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row clearfix">
+        <div class="col-lg-12">
+            <div class="card chat-app">
+                <!-- Это боковая панель списка чатов -->
+                <div id="plist" class="people-list">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-search"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Search...">
+                    </div>
+                    <ul class="list-unstyled chat-list mt-2 mb-0">
+                        <!-- Обрати внимание, тут добавляется класс актив для выбранного чата -->
+                        <li class="clearfix active">
+                            <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                            <div class="about user-{{ user.id }}">
+                                <div class="name">{{ user.username }}</div>
+                            </div>
+                        </li>
+                        {% for user_chat in chat_data.values() %}
+                            <li class="clearfix">
+                                <a href="{{ url_for('app.chat', user_id=user_chat.id) }}">
+                                <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
+                                <div class="about user-{{ user_chat.id }}">
+                                    <div class="name">{{ user_chat.username }}</div>
+                                </div>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="chat">
+                    <div class="chat-header clearfix">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                                </a>
+                                <div class="chat-about">
+                                    <h6 class="m-b-0">{{ user.username }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Сюда записываем сообщения. -->
+                    <div class="chat-history">
+                        <ul class="m-b-0">
+                            {% for message in messages %}
+                                {% if message.sender_id == current_user.id %}
+                                <li class="clearfix">
+                                    <div class="message-data text-right">
+                                        <span class="message-data-time">{{ message.timestamp.strftime('%Y.%m.%d %H:%M:%S') }}</span>
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+                                    </div>
+                                    <div class="message other-message float-right">{{ message.body }}</div>
+                                </li>
+                                {% else %}
+                                <li class="clearfix">
+                                    <div class="message-data">
+                                        <span class="message-data-time">{{ message.timestamp.strftime('%Y.%m.%d %H:%M:%S') }}</span>
+                                      </div>
+                                      <div class="message my-message">{{ message.body }}</div> 
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="chat-message clearfix">
+                        <div class="input-group mb-0">
+                            <div class="input-group-prepend" onclick="sendMessage('{{ current_chat.id }}', '{{ current_user.id }}', '{{ user.id }}')">
+                                <span class="input-group-text"><i class="fa fa-send"></i></span>
+                            </div>
+                            <textarea id="message-input" class="form-control" rows="2" name="message-input" placeholder="Enter text here..."></textarea>                                    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    // Скролл вниз после загрузки страницы
+    window.addEventListener("load", function() {
+        var chatHistory = document.querySelector(".chat-history");
+        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+    });
+
+    var socket = io();
+
+    // Тут пока привязан только коннект - дисконнект
+    socket.on("message", function (data) {
+      createChatItem(data);
+      var chatHistory = document.querySelector(".chat-history");
+        chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+    });
+
+
+    // Обработчик события для получения нового сообщения
+    socket.on("new_message", function(data) {
+        try {
+            createChatItem(data);
+            var chatHistory = document.querySelector(".chat-history");
+            chatHistory.scrollTop = chatHistory.scrollHeight - chatHistory.clientHeight;
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    function createChatItem(data) {
+        var jsonData = JSON.parse(data);
+        var msg = jsonData.body;
+        var time = jsonData.timestamp;
+        var msgElement = document.createElement("li");
+        msgElement.classList.add("clearfix");
+        if (jsonData.sender_id != "{{ current_user.id }}") {
+            msgElement.innerHTML = `
+            <div class="message-data">
+              <span class="message-data-time">${time}</span>
+            </div>
+            <div class="message my-message">${msg}</div> 
+        `;
+        } else {
+            msgElement.innerHTML = `
+            <div class="message-data text-right">
+              <span class="message-data-time">${time}</span>
+              <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+            </div>
+            <div class="message other-message float-right">${msg}</div>
+        `;
+        }
+        document.querySelector(".chat-history ul").appendChild(msgElement);
+        }
+
+    // Обработчик события для отправки сообщения при нажатии клафиши Enter
+    document.getElementById("message-input").addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        sendMessage("{{ current_chat.id }}", "{{ current_user.id }}", "{{ user.id }}" );
+      }
+    });
+
+    function sendMessage(chatId, senderId, receiverId) {
+        var messageInput = document.getElementById('message-input').value;
+        if (!messageInput) return;
+        var messageData = {
+            chat_id: chatId,
+            sender_id: senderId,
+            recipient_id: receiverId,
+            body: messageInput
+        };
+
+        if (!socket.connected) {
+            return;
+        }
+        console.log(messageData);
+
+        try {
+            socket.emit('new_message', messageData);
+            document.getElementById('message-input').value = "";
+        } catch (error) {
+            console.error(error);
+        }
+    }
+  </script>
+{% endblock %}

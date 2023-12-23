@@ -15,7 +15,7 @@
         <div class="form-container">
             <img src="{{ url_for('static', filename='img/login/illustration.png')}}" alt="illustration" class="illustration" />
             <form method="post">
-            {% if request.endpoint == 'login' %}
+            {% if request.endpoint == 'app.login' %}
                 <h1-login class="opacity">Вход</h1-login>
                 <form>
                     <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" autocomplete="username" class="form-control"/>
@@ -24,10 +24,10 @@
                     <button type="submit" class="opacity">ОТПРАВИТЬ</button>
                 </form>
                 <div class="register-forget opacity">
-                    <a href="{{ url_for('register') }}">Регистрация</a>
-                    <a href="{{ url_for('restoring_access') }}">Забыли пароль?</a>
+                    <a href="{{ url_for('app.register') }}">Регистрация</a>
+                    <a href="{{ url_for('app.restoring_access') }}">Забыли пароль?</a>
                 </div>
-            {% elif request.endpoint == 'register' %}
+            {% elif request.endpoint == 'app.register' %}
                 <h1-login class="opacity">Регистрация</h1-login>
                 <form>
                     <input type="username" name="username" id="username" placeholder="НИКНЕЙМ" autocomplete="username"/>
