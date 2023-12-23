@@ -2,9 +2,11 @@ import os
 from flask import flash, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 
+from utils.decorators import roles_required
+
 from .app import app, db
 from models import (
-    Conspect, conspect_file, favorites, File, Note, note_file, User
+    Conspect, Message, conspect_file, favorites, File, Note, note_file, User
 )
 from utils.files_utils import (
     add_at_conspects_and_save_files, add_at_conspect_and_save_images,
@@ -119,6 +121,7 @@ def delete_conspect(id):
 
 @app.route('/delete_all')   # эндпоинт самоуничтожения. Для отладки!
 @login_required
+@roles_required("admin")
 def delete_all():
     db.session.query(favorites).delete()
     db.session.query(note_file).delete()
@@ -126,6 +129,7 @@ def delete_all():
     db.session.query(File).delete()
     db.session.query(Note).delete()
     db.session.query(Conspect).delete()
+    db.session.query(Message).delete()
     db.session.commit()
 
     folder_path = os.path.join(app.static_folder, 'media', 'uploads')

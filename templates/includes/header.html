@@ -1,12 +1,12 @@
 <header data-bs-theme="dark" class="border-bottom">
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for('app.index') }}">NoteVi</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           {% if current_user.is_authenticated %}
           <li class="nav-item dropdown">
             <a class="nav-link active dropdown-toggle show" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-current="page">Заметки</a>
@@ -49,23 +49,24 @@
                 </div>
             </div>
           {% endif %}
-          <!-- <li class="nav-item">
-            <span class="nav-link"><span id="chat_btn" onclick="checkUnreadMessages()">Чат</span></span>
-          </li> -->
           <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('app.chat_list') }}">Чат</a>
+          </li>
+          <!-- <li class="nav-item">
             <a class="nav-link" href="{{ url_for('app.telegram') }}">Телега</a>
+          </li> -->
           <li class="nav-item">
           {% if request.endpoint != 'app.about' %}
             <a class="nav-link" href="{{ url_for('app.about') }}">О сайте</a>
           </li>
           {% endif %}
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">Работай шустрее</a>
-          </li>
+          </li> -->
         </ul>
         <ul class="navbar-nav me-0">
           {% if current_user.is_authenticated %}
-            <a href="{{ url_for('app.create_note') }}" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Новая заметка</a>
+            <a href="{{ url_for('app.create_note') }}" class="btn btn-warning mb-2 mb-lg-0" style="margin-right: 10px;">Новая заметка</a>
           {% else %}
             <a href="{{ url_for('app.login') }}" class="btn btn-warning mb-2 mb-md-0" style="margin-right: 10px;">Вход</a>
           {% endif %}
@@ -75,11 +76,11 @@
             <button class="btn btn-outline-success" type="submit">Поиск</button>
           </form>
           {% if current_user.is_authenticated %}
-            <div class="dropdown text-center text-md-end mt-2 mt-md-1">
+            <div class="dropdown text-center text-lg-end mt-2 mt-lg-1">
               <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-2.webp" alt="mdo" width="32" height="32" class="rounded-circle">
               </a>
-              <ul class="dropdown-menu dropdown-menu-end">
+              <ul class="dropdown-menu dropdown-menu-end text-center text-lg-start">
                 {% if current_user.is_admin %}
                   <li><a class="dropdown-item" href="{{ url_for('app.admin.index') }}">Админка</a></li>
                 {% endif %}

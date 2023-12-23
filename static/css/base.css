@@ -162,7 +162,6 @@ body {
   position: absolute;
   visibility: visible;
   z-index: 9999;
-  /* width: 750px; */
 }
 
 #message-icon {
@@ -234,4 +233,3 @@ body {
   padding: 0;
   margin: 0;
 }
-

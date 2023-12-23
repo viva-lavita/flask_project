@@ -24,6 +24,25 @@ body {
 .chat {
     margin-top: auto;
     margin-bottom: auto;
+
+}
+
+@media screen and (min-width: 767px) {
+    #chat {
+        display: flex;
+        overflow-y: auto;
+        height: 90%;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+    }
+}
+
+
+.chat-container ::-webkit-scrollbar {
+    width: 0.3em;
+    background-color: slategrey;
+    border-radius: 10px;
+    /* display: none; */
 }
 
 .card_users {
@@ -73,6 +92,11 @@ body {
     overflow-y: auto;
     white-space: nowrap;
 }
+/* 
+.contacts_body::-webkit-scrollbar {
+    display: none;
+} */
+
 
 .msg_card_body {
     overflow-y: auto;
@@ -313,7 +337,7 @@ border-radius: 0 0 15px 15px !important;
 }
 
 @media(max-width: 576px) {
-    .contacts_card{
+    .contacts_card {
         margin-bottom: 15px !important;
     }
 }
@@ -323,7 +347,6 @@ border-radius: 0 0 15px 15px !important;
     color: white;
 }
 
-
 .msg_icon {
     margin-top: auto;
     margin-bottom: 2em;
@@ -331,4 +354,8 @@ border-radius: 0 0 15px 15px !important;
     margin-right: 2em;
     right: 1.2em;
     color: rgb(217, 117, 24);
+}
+
+.overflow-y-auto {
+    overflow-y: auto !important;    
 }

@@ -2,6 +2,7 @@ import ast
 import json
 from flask import request, render_template, redirect, url_for, session, flash
 from flask_login import login_required, current_user
+from utils.decorators import roles_required
 
 from utils.generate_room_code import generate_room_code
 from views import app
@@ -56,10 +57,9 @@ def get_last_unread_receive_messages(chat_id):
     )
     return messages
 
+
 def get_current_chat(chats, user_id):
-    """
-    Функция для получения текущего чата.
-    """
+    """ Получение текущего чата. """
     current_chat_list = [chat for chat in chats if
                          chat.recipient_id == user_id and
                          chat.user_id == current_user.id or
@@ -75,6 +75,7 @@ def get_current_chat(chats, user_id):
 @app.route("<int:user_id>/chat")
 @login_required
 def chat(user_id):
+    """ Функционал чата """
     user = User.get_by_id(user_id)
     chats = current_user.get_all_chats()
     current_chat = get_current_chat(chats, user_id)
@@ -100,7 +101,7 @@ def chat(user_id):
     if current_chat.id in unread_chats_ids:
         unread_chats_ids.discard(current_chat.id)
         make_messages_read(get_last_unread_receive_messages(current_chat.id))
-    return render_template("chat2.html",
+    return render_template("chat.html",
                            current_chat=current_chat,
                            user=user,
                            chat_data=chat_data,
@@ -111,22 +112,18 @@ def chat(user_id):
 
 @app.route("/messages_delete")
 @login_required
+@roles_required("admin")
 def messages_delete():
+    """ Удаление всех сообщений """
     db.session.query(Message).delete()
     db.session.commit()
     return redirect(url_for("app.index"))
 
 
-@app.route("/chat_list")
-@login_required
-def chat_list():
-    chats = current_user.get_all_chats()
-    return render_template("chat_list.html", chats=chats)
-
-
 @app.route("/check_unread_messages_api/<int:chat_id>")
 @login_required
 def check_unread_messages_api(chat_id):
+    """ Возвращает список чатов с непрочитанными сообщенями. """
     unread_chats_ids = get_ids_chats_with_unread_messages()
     unread_chats_ids.discard(chat_id)
     unread_chats_ids_json = json.dumps(list(unread_chats_ids))
@@ -146,10 +143,25 @@ def get_unread_messages_api():
     chats = Chat.query.filter(Chat.id.in_(unread_chats_ids))
     data = {'unread_chats_ids': list(unread_chats_ids)}
     for chat in chats:
-        sender = User.get_by_id(chat.user_id)
-        data[chat.user_id] = {
+        if chat.recipient_id == current_user.id:
+            sender = User.get_by_id(chat.user_id)
+        else:
+            sender = User.get_by_id(chat.recipient_id)
+        data[sender.id] = {
             'username': sender.username,
             # 'image': sender.avatar  # дописать передачу адреса аватарки
         }
     data_json = json.dumps(data)
     return data_json
+
+
+@app.route("/chat_list")
+@login_required
+def chat_list():
+    chats = current_user.get_all_chats()
+    if chats:
+        chat = chats[-1]
+        if chat.recipient_id == current_user.id:
+            return redirect(url_for("app.chat", user_id=chat.user_id))
+        return redirect(url_for("app.chat", user_id=chat.recipient_id))
+    return redirect(url_for("app.chat", user_id='1'))

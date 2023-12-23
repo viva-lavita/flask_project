@@ -34,7 +34,7 @@ function checkUnreadMessages() {
           for (const userId in idsData) {
               const data = idsData[userId];
               const chatElem = `
-                  <a href="${userId}/chat" class="chat-action">
+                  <a href="/${userId}/chat" class="chat-action">
                       <li class="user_widget" id="${userId}">
                           <div class="d-flex">
                               <div>
