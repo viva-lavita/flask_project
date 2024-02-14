@@ -4,7 +4,6 @@ from flask import request, render_template, redirect, url_for, session, flash
 from flask_login import login_required, current_user
 from utils.decorators import roles_required
 
-from utils.generate_room_code import generate_room_code
 from views import app
 from models import db, User, Chat, Message
 

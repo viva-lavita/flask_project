@@ -16,6 +16,7 @@ from utils.files_utils import (
 
 @app.route('/conspects/<int:id>')
 def conspect(id):
+    """Страница конспекта"""
     conspect = Conspect.get_by_id(id)
     if not conspect:
         flash('Конспект не найден', 'danger')
@@ -32,6 +33,7 @@ def conspect(id):
 @app.route('/upload_conspects', methods=['GET', 'POST'])
 @login_required
 def upload_conspects():
+    """Страница загрузки конспектов"""
     if request.method == 'POST':
         if request.files.getlist('files') == []:
             flash('Файлы отсутствуют', 'danger')

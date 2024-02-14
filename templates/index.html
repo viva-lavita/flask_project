@@ -21,9 +21,9 @@
         <img src="{{ url_for('static', filename='img/index/99.jpg')}}"class="bd-placeholder-img" width="100%" height="100%" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"></img>
         <div class="container">
           <div class="carousel-caption text-start">
-            <h1>Сделай заметку.</h1>
-            <p class="opacity-75">А то забудешь фичу. Мы все люди.</p>
-            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.create_note')}}">Делаю!</a></p>
+            <h1>Загрузи конспект.</h1>
+            <p class="opacity-75">Поделись с братом-разработчиком - сделай его публичным.</p>
+            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.upload_conspects')}}">Загружаю!</a></p>
           </div>
         </div>
       </div>
@@ -41,9 +41,9 @@
         <img src="{{ url_for('static', filename='img/index/5.jpg')}}"class="bd-placeholder-img" width="100%" height="100%" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"></img>
         <div class="container">
           <div class="carousel-caption text-end">
-            <h1>Пересмотри избранные заметки</h1>
-            <p>Убури ненужные. Не засоряй себе мозг.</p>
-            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.favorites')}}">Удаляю!</a></p>
+            <h1>Пообщайся в чате.</h1>
+            <p>Его можно начать прямо нажав на автора заметки или конспекта.</p>
+            <p><a class="btn btn-lg btn-outline-success" href="{{ url_for('app.public')}}">Смотрю!</a></p>
           </div>
         </div>
       </div>
@@ -88,8 +88,8 @@
 
     <div class="row featurette">
       <div class="col-md-7">
-          <h2 class="featurette-heading fw-normal lh-1">Тут будет контент, но это не точно. <span class="text-body-secondary">It’ll blow your mind.</span></h2>
-          <p class="lead">Надо будет дописать логирование, доделать отправку на почту ошибок.</p>
+          <h2 class="featurette-heading fw-normal lh-1">Можно добавить заметки или конспекты в избранное, подписаться на авторов. <span class="text-body-secondary">It’ll blow your mind.</span></h2>
+          <p class="lead">Кнопка "Подписки" содержит в себе все связанное с отслеживанием. Обязательно подпишись на кого-нибудь и в подпункте "Подписки" нажми на его имя. Там красивый оффканвас.</p>
       </div>
       <div class="col-md-5 order-md-1">
           <img src="{{ url_for('static', filename='img/index/33.jpg')}}" alt="Image Description" class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500">
@@ -100,7 +100,7 @@
 
     <div class="row featurette">
       <div class="col-md-7 order-md-2">
-        <h2 class="featurette-heading fw-normal lh-1">Oh yeah, it’s that good. <span class="text-body-secondary">Есть мобильная версия.</span></h2>
+        <h2 class="featurette-heading fw-normal lh-1">Oh yeah, it’s that good. Здешний чат - просто космос.<span class="text-body-secondary">Есть мобильная версия.</span></h2>
         <p class="lead">Самое трудное было - прибить footer к низу страницы.</p>
       </div>
       <div class="col-md-5 order-md-1">
@@ -112,7 +112,7 @@
 
     <div class="row featurette">
       <div class="col-md-7">
-        <h2 class="featurette-heading fw-normal lh-1">А еще тут классная страница ошибки 404. <span class="text-body-secondary">И на 500, да.</span></h2>
+        <h2 class="featurette-heading fw-normal lh-1">А еще тут классная страница ошибки 404.<span class="text-body-secondary">И на 500, да.</span></h2>
         <p class="lead">И симпатичная страница регистрации.</p>      
       </div>
       <div class="col-md-5">

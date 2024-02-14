@@ -8,7 +8,10 @@ from wtforms.validators import Length, Optional
 class EditProfileForm(FlaskForm):
     name = StringField("Имя", validators=[Length(max=25)])
     surname = StringField("Фамилия", validators=[Length(max=25)])
-    birth_date = DateTimeField("Дата рождения (гггг.мм.дд)", format="%Y.%m.%d", default='', validators=[Optional()])
+    birth_date = DateTimeField("Дата рождения (гггг.мм.дд)",
+                               format="%Y.%m.%d",
+                               default='',
+                               validators=[Optional()])
     phone = TelField("Телефон", validators=[Length(max=25)])
     city = StringField("Город", validators=[Length(max=25)])
     profession = StringField("Профессия", validators=[Length(max=40)])

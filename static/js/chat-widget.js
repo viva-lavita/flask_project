@@ -22,7 +22,6 @@ function checkUnreadMessages() {
           }
           const idsData = JSON.parse(responseText);
           console.log(idsData);
-          // const messageIcon = document.getElementById('message-icon');
           messageIcon.classList.remove('hidden');
           let root = document.getElementById('chat_widget');
           let divChat = document.createElement('div');
@@ -63,5 +62,10 @@ function checkUnreadMessages() {
   xhr.send();
 }
 
-checkUnreadMessages();
-setInterval(checkUnreadMessages, 100 * 1000);
+const isAuthenticated = document.getElementById("auth-check").getAttribute("data-is-authenticated");
+
+
+if (isAuthenticated === "True") {
+  checkUnreadMessages();
+  setInterval(checkUnreadMessages, 100 * 1000);
+}
