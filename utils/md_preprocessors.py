@@ -12,7 +12,9 @@ class CodeBlockExtension(Extension):
 
 class CodeBlockPreprocessor(Preprocessor):
     """ Дополнительная логика рендеринга md-файла. """
-    CODE_BLOCK_RE = re.compile(r'^```(\w+)\n(.*?)\n```$', re.MULTILINE | re.DOTALL)
+    CODE_BLOCK_RE = re.compile(
+        r'^```(\w+)\n(.*?)\n```$', re.MULTILINE | re.DOTALL
+    )
 
     def run(self, lines):
         new_lines = []

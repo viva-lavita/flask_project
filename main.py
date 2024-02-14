@@ -163,7 +163,7 @@ def handle_new_message(data: dict):
 TAG_ONLINE_STORAGE = {}
 
 
-def filling_online_storage():
+def filling_online_storage() -> None:
     """Заполняет хранилище онлайн статусов."""
     if TAG_ONLINE_STORAGE:
         return
@@ -172,7 +172,11 @@ def filling_online_storage():
 
 
 @socketio.on('online')
-def handle_online(data):
+def handle_online(data): # возможно дописать добавление в бд и обновление по таймеру
+    # если время последнего бекапа меньше последнего онлайна - в список и обновлять
+    """ Обноовление времени онлайна для пользователя. """
+    if current_user.is_anonymous:
+        return
     TAG_ONLINE_STORAGE[current_user.id] = data['timestamp']
 
 

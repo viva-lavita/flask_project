@@ -31,6 +31,7 @@
     {% include 'includes/header.html' %}
     <div class="wrapper">
       <main class="main" id="root">
+        <div id="auth-check" data-is-authenticated="{{ current_user.is_authenticated }}"></div>
         {% if request.endpoint != 'app.chat' %}
           <div id="message-icon" class="hidden">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">

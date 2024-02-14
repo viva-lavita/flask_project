@@ -2,7 +2,7 @@ from datetime import datetime
 
 # from flask_login import LoginManager
 # from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -155,7 +155,7 @@ class Chat(db.Model):
         ).limit(10)[::-1]
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(
         db.String(64), index=True, unique=True, nullable=False
@@ -274,18 +274,6 @@ class User(db.Model):
 
     def followed_list(self):
         return self.followed.filter(follows.c.followed_id == self.id).all()
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    @property
-    def is_active(self):
-        return True
-
-    @property
-    def is_anonymous(self):
-        return False
 
     @property
     def roles(self):
@@ -427,7 +415,7 @@ conspect_file = db.Table(
     )
 )
 
-# M2M иллюстрация конспекта
+# M2M иллюстрации конспекта
 conspect_image = db.Table(
     'conspect_image',
     db.Column(
@@ -484,6 +472,9 @@ class Conspect(db.Model):
                              backref=db.backref('img_conspects',
                                                 lazy=True))
 
+    def __str__(self):
+        return self.name
+
     def __repr__(self):
         return '<Conspect %r>' % self.id
 
@@ -497,6 +488,7 @@ class Conspect(db.Model):
 
     @classmethod
     def get_public_conspects(cls):
+        """ Список публичных конспектов. """
         return (cls.query.filter_by(public='on')
                          .order_by(cls.id.desc())
                          .all())
